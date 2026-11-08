@@ -1,0 +1,149 @@
+﻿@model IEnumerable<WebApp_MoNoFS.Models.Wishlist>
+
+@{
+    ViewBag.Title = "My Wishlist";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@* === CSS để chỉnh ảnh và nút xóa === *@
+<style>
+    .cart-img {
+        width: 80px;
+        height: 80px;
+        object-fit: cover;
+        border-radius: 4px;
+    }
+
+    .wishlist-empty-icon {
+        color: #ccc;
+        margin-bottom: 20px;
+    }
+</style>
+
+<section class="cart-hero-section">
+    <div class="container">
+        <h1 class="cart-title">MY WISHLIST</h1>
+        <p class="cart-subtitle">
+            Your collection of saved items for later.
+        </p>
+    </div>
+</section>
+
+<section class="py-5 cart-content-section">
+    <div class="container">
+
+        @* --- HIỂN THỊ THÔNG BÁO --- *@
+        @if (TempData["Message"] != null)
+        {
+            <div class="alert alert-success alert-dismissible fade show mb-4" role="alert">
+                <i class="fas fa-check-circle me-2"></i> @TempData["Message"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        }
+
+        @* --- TRƯỜNG HỢP 1: DANH SÁCH TRỐNG --- *@
+        @if (Model == null || !Model.Any())
+        {
+            <div class="alert alert-info text-center py-5">
+                <div class="wishlist-empty-icon">
+                    <i class="far fa-heart fa-3x"></i>
+                </div>
+                <h4>Your wishlist is currently empty.</h4>
+                <p class="mb-3">Explore our collection and find something you love!</p>
+
+                @* Dùng thẻ A thay cho ActionLink để tránh lỗi cú pháp *@
+                <a href="@Url.Action("Index", "Product")" class="btn btn-dark mt-3">
+                    Continue shopping
+                </a>
+            </div>
+        }
+        else
+        {
+            @* --- TRƯỜNG HỢP 2: CÓ SẢN PHẨM (BẢNG) --- *@
+            <div class="cart-table-wrapper table-responsive">
+                <table class="table align-middle cart-table">
+                    <thead>
+                        <tr>
+                            <th scope="col" colspan="2">PRODUCT</th>
+                            <th scope="col" class="text-center">PRICE</th>
+                            <th scope="col" class="text-center">ACTION</th>
+                            <th scope="col" class="text-center">REMOVE</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                @* Cột 1: Hình ảnh *@
+                                <td class="product-thumbnail">
+                                    <a href="@Url.Action("Detail", "Product", new { id = item.ProductId })">
+                                        @* Đã đưa style vào class .cart-img ở trên đầu file để tránh lỗi *@
+                                        <img src="@Url.Content("~/Images/" + item.Product.ProImage)"
+                                             alt="@item.Product.ProName"
+                                             class="img-fluid cart-img">
+                                    </a>
+                                </td>
+
+                                @* Cột 2: Tên sản phẩm *@
+                                <td class="product-name">
+                                    <a href="@Url.Action("Detail", "Product", new { id = item.ProductId })"
+                                       class="text-decoration-none fw-bold text-dark">
+                                        @item.Product.ProName
+                                    </a>
+                                    <p class="text-muted small mb-0 mt-1">
+                                        @(item.Product.Category != null ? item.Product.Category.CatName : "")
+                                    </p>
+                                </td>
+
+                                @* Cột 3: Giá *@
+                                <td class="product-price text-center fw-bold">
+                                    @if (item.Product.ProPrice.HasValue)
+                                    {
+                                        @item.Product.ProPrice.Value.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("en-US"))
+                                    }
+                                    else
+                                    {
+                                        <span>Contact</span>
+                                    }
+                                </td>
+
+                                <td class="text-center">
+                                    @using (Html.BeginForm("Add", "Cart", FormMethod.Post))
+                                    {
+                                        @* Gửi ID sản phẩm *@
+                                        <input type="hidden" name="id" value="@item.ProductId" />
+
+                                        @* Gửi Số lượng mặc định là 1 *@
+                                        <input type="hidden" name="quantity" value="1" />
+
+                                        @* Nút Submit *@
+                                        <button type="submit" class="btn btn-dark btn-sm">
+                                            <i class="fas fa-cart-plus me-2"></i> Add to Cart
+                                        </button>
+                                    }
+                                </td>
+
+                                @* Cột 5: Nút Xóa *@
+                                <td class="product-remove text-center">
+                                    <a href="@Url.Action("Remove", "Wishlist", new { proId = item.ProductId, returnUrl = Request.Url.PathAndQuery })"
+                                       class="btn btn-outline-danger btn-remove-item"
+                                       onclick="return confirm('Are you sure you want to remove this item from wishlist?');"
+                                       title="Remove">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+
+                @* Nút quay lại mua sắm *@
+                <div class="mt-4 pt-3 border-top">
+                    <a href="@Url.Action("Index", "Product")" class="btn btn-outline-dark">
+                        Continue Shopping
+                    </a>
+                </div>
+            </div>
+        }
+    </div>
+</section>

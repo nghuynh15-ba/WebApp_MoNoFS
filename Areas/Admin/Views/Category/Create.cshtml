@@ -1,0 +1,42 @@
+﻿@model WebApp_MoNoFS.Models.Category
+
+@{
+    ViewBag.Title = "Add Category";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="page-title" style="font-family: 'Playfair Display', serif; font-weight: 700;">New Category</h2>
+        <a href="@Url.Action("Index")" class="btn btn-outline-dark rounded-0">
+            <i class="fas fa-arrow-left me-2"></i> Back
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm" style="max-width: 600px;">
+        <div class="card-body p-4">
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Category Name <span class="text-danger">*</span></label>
+                    @Html.EditorFor(model => model.CatName, new { htmlAttributes = new { @class = "form-control rounded-0", placeholder = "Ex: T-Shirt, Jeans..." } })
+                    @Html.ValidationMessageFor(model => model.CatName, "", new { @class = "text-danger small" })
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Parent Category (Optional)</label>
+                    @Html.DropDownList("ParentId", (SelectList)ViewBag.ParentList, "--- None (Root Category) ---", new { @class = "form-select rounded-0" })
+                    <small class="text-muted">Leave empty if this is a main category (e.g., MEN, WOMEN).</small>
+                </div>
+
+                <div class="mt-4 text-end">
+                    <button type="submit" class="btn btn-dark rounded-0 px-4">
+                        <i class="fas fa-save me-2"></i> Save
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>

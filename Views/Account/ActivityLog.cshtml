@@ -1,0 +1,229 @@
+﻿@model IEnumerable<WebApp_MoNoFS.Models.CustomerLog>
+@{
+    ViewBag.Title = "Activity History";
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+<style>
+    /* --- CẤU TRÚC CHUNG --- */
+    .activity-page {
+        background-color: #f8f9fa;
+        padding: 20px 0;
+    }
+
+    .timeline {
+        position: relative;
+        padding-left: 30px;
+        border-left: 2px solid #e9ecef;
+        margin-left: 10px;
+    }
+
+    .timeline-item {
+        position: relative;
+        margin-bottom: 25px;
+    }
+
+    /* ICON TRÒN TRÊN TRỤC */
+    .timeline-icon {
+        position: absolute;
+        left: -41px;
+        top: 0;
+        width: 32px;
+        height: 32px; /* Tăng kích thước chút cho đẹp */
+        border-radius: 50%;
+        background: #fff;
+        border: 2px solid #ccc;
+        text-align: center;
+        line-height: 28px;
+        font-size: 14px;
+        z-index: 1;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    /* --- MÀU SẮC CHO TỪNG LOẠI HÀNH ĐỘNG (COLORS) --- */
+
+    /* 1. Login (Xanh dương) */
+    .timeline-item.Login .timeline-icon {
+        border-color: #3b82f6;
+        color: #3b82f6;
+        background: #eff6ff;
+    }
+
+    /* 2. Order (Xanh lá) */
+    .timeline-item.Order .timeline-icon {
+        border-color: #10b981;
+        color: #10b981;
+        background: #ecfdf5;
+    }
+
+    /* 3. Profile (Vàng cam) */
+    .timeline-item.Profile .timeline-icon {
+        border-color: #f59e0b;
+        color: #f59e0b;
+        background: #fffbeb;
+    }
+
+    /* 4. AddToCart (Xanh ngọc) */
+    .timeline-item.AddToCart .timeline-icon {
+        border-color: #06b6d4;
+        color: #06b6d4;
+        background: #ecfeff;
+    }
+
+    /* 5. RemoveFromCart (Đỏ cam) */
+    .timeline-item.RemoveFromCart .timeline-icon {
+        border-color: #ef4444;
+        color: #ef4444;
+        background: #fef2f2;
+    }
+
+    /* 6. Wishlist (Hồng) */
+    .timeline-item.AddToWishlist .timeline-icon {
+        border-color: #ec4899;
+        color: #ec4899;
+        background: #fdf2f8;
+    }
+
+    .timeline-item.RemoveFromWishlist .timeline-icon {
+        border-color: #64748b;
+        color: #64748b;
+        background: #f1f5f9;
+    }
+
+
+    /* NỘI DUNG BÊN PHẢI */
+    .timeline-content {
+        background: #fff;
+        padding: 15px 20px;
+        border-radius: 8px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        position: relative;
+        transition: transform 0.2s;
+        border-left: 3px solid transparent; 
+    }
+
+    /* Màu viền trái nội dung theo loại (Optional) */
+    .timeline-item.Login .timeline-content {
+        border-left-color: #3b82f6;
+    }
+
+    .timeline-item.Order .timeline-content {
+        border-left-color: #10b981;
+    }
+
+    .timeline-item.AddToCart .timeline-content {
+        border-left-color: #06b6d4;
+    }
+
+    .timeline-item.RemoveFromCart .timeline-content {
+        border-left-color: #ef4444;
+    }
+
+    .timeline-content:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+    /* Mũi tên nhỏ */
+    .timeline-content::before {
+        content: "";
+        position: absolute;
+        left: -8px;
+        top: 10px;
+        width: 15px;
+        height: 15px;
+        background: #fff;
+        transform: rotate(45deg);
+        border-radius: 2px;
+        border-left: 1px solid rgba(0,0,0,0.05);
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .time-stamp {
+        font-size: 0.8rem;
+        color: #999;
+        display: block;
+        margin-bottom: 5px;
+        font-weight: 500;
+    }
+
+    .log-desc {
+        font-size: 0.95rem;
+        color: #333;
+        font-weight: 500;
+        line-height: 1.5;
+    }
+
+    .page-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+</style>
+
+<div class="container py-5" style="max-width: 900px;">
+
+    <div class="page-header">
+        <div>
+            <h3 class="fw-bold mb-1">Activity History</h3>
+            <p class="text-muted mb-0">Track your account interactions, orders, and cart updates.</p>
+        </div>
+        <a href="@Url.Action("Info", "Account")" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-2"></i> Back to Profile
+        </a>
+    </div>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="text-center py-5">
+            <img src="https://cdn-icons-png.flaticon.com/512/7486/7486744.png" style="width: 100px; opacity: 0.5; margin-bottom: 15px;" />
+            <h5 class="text-muted">No activities recorded yet.</h5>
+            <p class="text-muted small">Your recent actions will appear here.</p>
+        </div>
+    }
+    else
+    {
+        <div class="timeline">
+            @foreach (var item in Model)
+            {
+                // Logic chọn Icon
+                string iconClass = "fa-circle"; // Mặc định
+
+                switch (item.ActionType)
+                {
+                    case "Login": iconClass = "fa-sign-in-alt"; break;
+                    case "Order": iconClass = "fa-file-invoice-dollar"; break;
+                    case "Profile": iconClass = "fa-user-cog"; break;
+
+                    // Các Case Mới
+                    case "AddToCart": iconClass = "fa-cart-plus"; break;
+                    case "RemoveFromCart": iconClass = "fa-trash-alt"; break;
+                    case "AddToWishlist": iconClass = "fa-heart"; break;
+                    case "RemoveFromWishlist": iconClass = "fa-heart-broken"; break;
+
+                    default: iconClass = "fa-dot-circle"; break;
+                }
+
+                <div class="timeline-item @item.ActionType">
+                    <div class="timeline-icon">
+                        <i class="fas @iconClass"></i>
+                    </div>
+
+                    <div class="timeline-content">
+                        <span class="time-stamp">
+                            <i class="far fa-clock me-1"></i>
+                            @item.CreatedDate.Value.ToString("dd MMM yyyy, HH:mm")
+                        </span>
+                        <div class="log-desc">
+
+                            @Html.Raw(item.Description)
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

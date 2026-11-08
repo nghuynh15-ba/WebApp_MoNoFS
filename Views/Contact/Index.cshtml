@@ -1,0 +1,122 @@
+﻿
+@{
+    ViewBag.Title = "Contact Us";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@* === 1. HERO SECTION === *@
+<section class="contact-hero-section">
+    <div class="container">
+        <div class="hero-text-box">
+            <h1 class="contact-title">GET IN TOUCH</h1>
+            <p class="contact-subtitle">
+                We value your feedback and look forward to assisting you with any inquiries.
+            </p>
+        </div>
+    </div>
+</section>
+
+@* === 2. KHU VỰC LIÊN HỆ CHÍNH === *@
+<section class="py-5 contact-main-section">
+    <div class="container">
+
+        <div class="row g-0 align-items-stretch">
+
+            @* --- CỘT BÊN TRÁI: FORM  --- *@
+            <div class="col-lg-7 p-4 p-md-5 bg-white h-100 d-flex flex-column justify-content-center">
+
+                <div>
+                    <h2 class="section-title mb-4">Send Us A Message</h2>
+
+                    @* (1) Hiển thị thông báo *@
+                    @if (ViewBag.SuccessMessage != null)
+                    {
+                        <div class="alert alert-success">@ViewBag.SuccessMessage</div>
+                    }
+                    @if (ViewBag.ErrorMessage != null)
+                    {
+                        <div class="alert alert-danger">@ViewBag.ErrorMessage</div>
+                    }
+
+                    @* (2) Form MVC *@
+                    @using (Html.BeginForm("Index", "Contact", FormMethod.Post, new { @class = "contact-form" }))
+                    {
+                        @Html.AntiForgeryToken()
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <input type="text" class="form-control" placeholder="Your Name" required name="Name">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <input type="email" class="form-control" placeholder="Your Email" required name="Email">
+                            </div>
+                        </div>
+
+                        
+
+                        <div class="mb-4">
+                            <textarea class="form-control" rows="5" placeholder="Your Message" required name="Message"></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-warning btn-lg">Send Message</button>
+                    }
+
+                    @* (3) Phần Social Media *@
+                    <div class="contact-form-social">
+                        <p>Or connect with us on social media</p>
+                        <div>
+                            <a href="#" title="Facebook"><i class="fab fa-facebook-f"></i></a>
+                            <a href="#" title="Instagram"><i class="fab fa-instagram"></i></a>
+                            <a href="#" title="Twitter"><i class="fab fa-twitter"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            @* --- CỘT BÊN PHẢI: INFO BOX --- *@
+            <div class="col-lg-5">
+                <div class="contact-info-box h-100">
+                    <h3>Contact Information</h3>
+
+                    <div class="contact-item d-flex mb-4">
+                        <i class="fas fa-phone-alt me-3"></i>
+                        <div>
+                            <h5>Phone</h5>
+                            <p>+1 234 5678 9010</p>
+                        </div>
+                    </div>
+                    <div class="contact-item d-flex mb-4">
+                        <i class="fas fa-envelope me-3"></i>
+                        <div>
+                            <h5>Email</h5>
+                            <p>info@MONOfashion.com</p>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-top: 40px;">Our Stores</h3>
+
+                    <div class="contact-item d-flex mb-4">
+                        <i class="fas fa-map-marker-alt me-3"></i>
+                        <div>
+                            <h5>Head Office (New York)</h5>
+                            <p>198 West 21th Street, Suite 721</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-item d-flex mb-4">
+                        <i class="fas fa-map-pin me-3"></i>
+                        <div>
+                            <h5>Ho Chi Minh City</h5>
+                            <p>123 Le Loi St., District 1</p>
+                            <p>456 Nguyen Trai St., District 5</p>
+                        </div>
+                    </div>
+
+
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>

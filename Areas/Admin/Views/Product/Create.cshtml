@@ -1,0 +1,135 @@
+﻿@model WebApp_MoNoFS.Models.Product
+
+@{
+    ViewBag.Title = "Add New Product";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="page-title" style="font-family: 'Playfair Display', serif; font-weight: 700;">
+            Create Product
+        </h2>
+        <a href="@Url.Action("Index")" class="btn btn-outline-dark rounded-0">
+            <i class="fas fa-arrow-left me-2"></i> Back to List
+        </a>
+    </div>
+
+    @using (Html.BeginForm("Create", "Product", FormMethod.Post, new { enctype = "multipart/form-data" }))
+    {
+        @Html.AntiForgeryToken()
+
+        <div class="row">
+            <div class="col-lg-8">
+
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-bottom-0 py-3">
+                        <h6 class="m-0 font-weight-bold text-primary text-uppercase" style="letter-spacing: 1px;">
+                            <i class="fas fa-info-circle me-2"></i> General Information
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Product Name <span class="text-danger">*</span></label>
+                            @Html.EditorFor(model => model.ProName, new { htmlAttributes = new { @class = "form-control rounded-0 form-control-lg", placeholder = "Example: Cotton T-Shirt..." } })
+                            @Html.ValidationMessageFor(model => model.ProName, "", new { @class = "text-danger small" })
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Category <span class="text-danger">*</span></label>
+                                @Html.DropDownList("CatId", null, "--- Select Sub-Category ---", new { @class = "form-select rounded-0" })
+                                @Html.ValidationMessageFor(model => model.CatId, "", new { @class = "text-danger small" })
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Price ($) <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text rounded-0 bg-light fw-bold">$</span>
+                                    @Html.EditorFor(model => model.ProPrice, new { htmlAttributes = new { @class = "form-control rounded-0", type = "number", min = "0" } })
+                                </div>
+                                @Html.ValidationMessageFor(model => model.ProPrice, "", new { @class = "text-danger small" })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-bottom-0 py-3">
+                        <h6 class="m-0 font-weight-bold text-success text-uppercase" style="letter-spacing: 1px;">
+                            <i class="fas fa-pen-nib me-2"></i> Detailed Content
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <label class="form-label fw-bold text-muted text-uppercase small">Short Description</label>
+                            @Html.TextAreaFor(model => model.Description, new { @class = "form-control rounded-0", rows = "3", placeholder = "Brief summary of the product..." })
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold text-muted text-uppercase small">Specifications / Details</label>
+                                @Html.TextAreaFor(model => model.Details, new { @class = "form-control rounded-0 bg-light", rows = "5", placeholder = "- Material: 100% Cotton\n- Origin: Vietnam..." })
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold text-muted text-uppercase small">Fit & Care Guide</label>
+                                @Html.TextAreaFor(model => model.FitAndCare, new { @class = "form-control rounded-0 bg-light", rows = "5", placeholder = "- Machine wash cold\n- Do not bleach..." })
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-bottom-0 py-3">
+                        <h6 class="m-0 font-weight-bold text-info text-uppercase" style="letter-spacing: 1px;">
+                            <i class="fas fa-image me-2"></i> Product Image
+                        </h6>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="img-preview-box mb-3 border bg-light d-flex align-items-center justify-content-center mx-auto" style="height: 300px; width: 100%; border-style: dashed !important;">
+                            <img id="previewImg" src="https://placehold.co/300x300?text=No+Image" alt="Preview" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                        </div>
+
+                        <label for="UploadImage" class="btn btn-outline-primary rounded-0 w-100 mb-2">
+                            <i class="fas fa-upload me-2"></i> Choose Image
+                        </label>
+                        <input type="file" name="UploadImage" id="UploadImage" class="d-none" onchange="previewFile(this);" accept=".jpg,.jpeg,.png" />
+
+                        <small class="text-muted d-block mt-2">Format: JPG, JPEG, PNG</small>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <button type="submit" class="btn btn-dark w-100 rounded-0 py-2 fw-bold text-uppercase">
+                            <i class="fas fa-save me-2"></i> Publish Product
+                        </button>
+                        <a href="@Url.Action("Index")" class="btn btn-light w-100 rounded-0 py-2 mt-2 text-muted">
+                            Cancel
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        function previewFile(input) {
+            var file = input.files[0];
+            if (file) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    $('#previewImg').attr('src', e.target.result);
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+}

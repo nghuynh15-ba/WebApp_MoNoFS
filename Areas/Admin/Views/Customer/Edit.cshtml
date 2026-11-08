@@ -1,0 +1,112 @@
+﻿@model WebApp_MoNoFS.Models.Customer
+
+@{
+    ViewBag.Title = "Edit Customer";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid" style="max-width: 900px;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="page-title" style="font-family: 'Playfair Display', serif; font-weight: 700;">Edit Profile</h2>
+        <a href="@Url.Action("Index")" class="btn btn-outline-dark rounded-0">
+            <i class="fas fa-arrow-left me-2"></i> Back
+        </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            @using (Html.BeginForm("Edit", "Customer", FormMethod.Post, new { enctype = "multipart/form-data" }))
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(model => model.UserId)
+
+                <div class="row">
+                    <div class="col-md-4 text-center border-end">
+                        <label class="form-label fw-bold mb-3 d-block">Avatar</label>
+
+                        <div class="position-relative d-inline-block">
+                            <img id="previewImg"
+                                 src="~/Images/CUSTOMERS/@(string.IsNullOrEmpty(Model.Photo) ? "default-user.png" : Model.Photo)"
+                                 class="rounded-circle border"
+                                 style="width: 150px; height: 150px; object-fit: cover;"
+                                 onerror="this.src='https://placehold.co/150x150?text=User'" />
+
+                            <label for="ImageFile" class="btn btn-sm btn-dark rounded-circle position-absolute bottom-0 end-0 mb-2 me-2" style="width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                                <i class="fas fa-camera"></i>
+                            </label>
+                        </div>
+
+                        <input type="file" name="ImageFile" id="ImageFile" class="d-none" onchange="previewFile()" accept="image/*" />
+
+                        <p class="text-muted small mt-3">Allowed *.jpeg, *.jpg, *.png</p>
+                    </div>
+
+                    <div class="col-md-8 ps-md-4">
+                        <h5 class="fw-bold mb-3">User Information</h5>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Username</label>
+                            <input type="text" class="form-control rounded-0 bg-light" value="@Model.Username" readonly />
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Full Name</label>
+                                @Html.EditorFor(model => model.Fullname, new { htmlAttributes = new { @class = "form-control rounded-0" } })
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label fw-bold">Phone</label>
+                                @Html.EditorFor(model => model.Phone, new { htmlAttributes = new { @class = "form-control rounded-0" } })
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Email</label>
+                            @Html.EditorFor(model => model.Email, new { htmlAttributes = new { @class = "form-control rounded-0" } })
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Address</label>
+                            @Html.TextAreaFor(model => model.Address, new { @class = "form-control rounded-0", rows = "2" })
+                        </div>
+
+                        <div class="mb-4 bg-light p-3 border rounded-0">
+                            <div class="form-check form-switch d-flex align-items-center ps-0">
+                                @Html.CheckBox("Activated", Model.Activated ?? false, new { @class = "form-check-input ms-0 me-3", id = "flexSwitchCheckChecked", style = "width: 3rem; height: 1.5rem; cursor: pointer;" })
+
+                                <label class="form-check-label fw-bold pt-1" for="flexSwitchCheckChecked" style="cursor: pointer; user-select: none;">
+                                    Active Account
+                                </label>
+                            </div>
+                            <small class="text-muted d-block mt-2 fst-italic">Toggle this switch to lock or unlock the user account.</small>
+                        </div>
+
+                        <div class="mt-4 text-end">
+                            <button type="submit" class="btn btn-dark rounded-0 px-4">
+                                <i class="fas fa-save me-2"></i> Save Changes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function previewFile() {
+            var preview = document.querySelector('#previewImg');
+            var file = document.querySelector('#ImageFile').files[0];
+            var reader = new FileReader();
+
+            reader.addEventListener("load", function () {
+                preview.src = reader.result;
+            }, false);
+
+            if (file) {
+                reader.readAsDataURL(file);
+            }
+        }
+    </script>
+}

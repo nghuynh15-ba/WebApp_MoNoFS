@@ -1,0 +1,266 @@
+﻿@using WebApp_MoNoFS.Models
+@model IEnumerable<WebApp_MoNoFS.Models.Product>
+@{
+    ViewBag.Title = "Products";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var parentCategories = ViewBag.ParentCategories as List<WebApp_MoNoFS.Models.Category>;
+
+    var wishlistIds = ViewBag.WishlistProIds as List<int> ?? new List<int>();
+
+    //Lấy dữ liệu phân trang 
+    int totalPages = ViewBag.TotalPages ?? 0;
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int pageSize = ViewBag.PageSize ?? 6;
+    int totalProducts = ViewBag.TotalProducts ?? 0;
+    int? currentCatId = ViewBag.CurrentCatId;
+
+    //Tính phần Showing
+    int startItem = (currentPage - 1) * pageSize + 1;
+    int endItem = Math.Min(currentPage * pageSize, totalProducts);
+    if (totalProducts == 0) { startItem = 0; }
+
+}
+
+<style>
+    
+    .product-name,
+    .product-name a {
+        font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+        font-weight: 600; 
+        text-decoration: none;
+        color: #000; 
+        letter-spacing: 0.5px; 
+    }
+
+        .product-name a:hover {
+            color: #c8a165; 
+        }
+
+  
+    .product-info-text .price {
+        font-family: sans-serif;
+        font-weight: 700;
+        color: #333;
+        margin-top: 5px;
+    }
+</style>
+
+
+@* === PHẦN 1: HERO  === *@
+<section class="products-hero-section">
+    <div class="container">
+        <h1 class="products-title">SHOP ALL PRODUCTS</h1>
+        <p class="products-subtitle">
+            Curated collection of timeless essentials for Women, Men, and Accessories.
+        </p>
+    </div>
+</section>
+
+<section class="py-5 shop-main-content">
+    <div class="container">
+        <div class="row">
+            @* --- SIDEBAR ---  *@
+            <div class="col-lg-3">
+                <aside class="sidebar-filter p-4">
+
+                    <div class="widget mb-4">
+                        <h5 class="widget-title">Shop By</h5>
+                        <ul class="list-unstyled sidebar-list">
+                            <li><a href="@Url.Action("Index", "Product")">All Products</a></li>
+                            @if (parentCategories != null)
+                            {
+                                foreach (var cat in parentCategories)
+                                {
+                                    <li><a href="@Url.Action("Index", "Product", new { categoryId = cat.CatId })">@cat.CatName</a></li>
+                                }
+                            }
+                        </ul>
+                    </div>
+                    <div class="widget mb-4">
+                        <h5 class="widget-title mt-4">Categories</h5>
+                        <div class="accordion" id="categoryAccordion">
+                            @if (parentCategories != null)
+                            {
+                                foreach (var parentCat in parentCategories)
+                                {
+                                    <div class="accordion-item">
+                                        <h2 class="accordion-header" id="heading-@parentCat.CatId">
+                                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse-@parentCat.CatId">
+                                                @parentCat.CatName
+                                            </button>
+                                        </h2>
+                                        <div id="collapse-@parentCat.CatId" class="accordion-collapse collapse" data-bs-parent="#categoryAccordion">
+                                            <div class="accordion-body">
+                                                <ul class="list-unstyled sidebar-list">
+                                                    @if (parentCat.Category1 != null)
+                                                    {
+                                                        foreach (var childCat in parentCat.Category1)
+                                                        {
+                                                            <li><a href="@Url.Action("Index", "Product", new { categoryId = childCat.CatId })">@childCat.CatName</a></li>
+                                                        }
+                                                    }
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                    <div class="widget mb-4">
+                        <h5 class="widget-title">Filter by Price</h5>
+                        <input type="range" class="form-range" min="0" max="500" value="300" id="priceRange">
+                        <p class="price-output mt-2">$0 - $300</p>
+                        <button class="btn btn-warning btn-sm w-100">Apply Filter</button>
+                    </div>
+                    <div class="widget mb-4">
+                        <h5 class="widget-title">Colors</h5>
+                        <div class="color-options">
+                            <span class="color-dot black"></span>
+                            <span class="color-dot white"></span>
+                            <span class="color-dot grey active"></span>
+                            <span class="color-dot navy"></span>
+                            <span class="color-dot brown"></span>
+                        </div>
+                    </div>
+                </aside>
+            </div>
+
+            @* --- GRID SẢN PHẨM CHÍNH --- *@
+            <div class="col-lg-9">
+                <div class="row mb-4 align-items-center">
+                    <div class="col-md-6">
+                        <p class="product-count mb-0">Showing 1–@Model.Count() of @ViewBag.TotalProducts results</p>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <select class="form-select sorting-select">
+                            <option selected>Sort by newest</option>
+                            <option>Sort by price: low to high</option>
+                            <option>Sort by price: high to low</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="row product-grid">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var product in Model)
+                        {
+                            bool isInWishlist = wishlistIds.Contains(product.ProId);
+                            <div class="col-md-4 col-sm-6 mb-4">
+                                <div class="product-card d-flex flex-column h-100 text-center">
+
+                                    <div class="product-image-wrapper mb-3 aspect-ratio">
+
+                                        @if (isInWishlist)
+                                        {
+                                            <a href="@Url.Action("Remove", "Wishlist", new { proId = product.ProId, returnUrl = Request.Url.PathAndQuery })"
+                                               class="wishlist-btn active"
+                                               title="Bỏ thích">
+                                                <i class="fas fa-heart"></i>
+                                            </a>
+                                        }
+                                        else
+                                        {
+
+                                            <a href="@Url.Action("AddToWishlist", "Wishlist", new { proId = product.ProId, returnUrl = Request.Url.PathAndQuery })"
+                                               class="wishlist-btn"
+                                               title="Yêu thích">
+                                                <i class="far fa-heart"></i>
+                                            </a>
+                                        }
+
+
+                                        <a href="@Url.Action("Detail", "Product", new { id = product.ProId })">
+                                            <img src="@Url.Content("~/Images/" + product.ProImage)" alt="@product.ProName" class="img-fluid">
+                                        </a>
+
+
+
+                                        <!-- Add to cart Overlay -->
+                                        @using (Html.BeginForm("Add", "Cart", FormMethod.Post, new { @class = "add-to-cart-form-overlay" }))
+                                        {
+                                            @Html.Hidden("id", product.ProId)
+
+                                            @Html.Hidden("quantity", 1)
+
+
+                                            @Html.Hidden("returnUrl", Request.RawUrl)
+
+                                            <button type="submit" class="btn btn-add-to-cart-overlay btn-product-overlay">
+                                                <i class="fas fa-shopping-cart"></i> Add to cart
+                                            </button>
+                                        }
+                                    </div>
+                                    <div class="product-info-text mt-auto">
+                                        <p class="product-name fw-bold mb-1">
+                                            <a href="@Url.Action("Detail", "Product", new { id = product.ProId })"
+                                               class="product-link">@product.ProName</a>
+                                        </p>
+                                        <span class="price d-block">
+                                            @(product.ProPrice?.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("en-US")))
+                                        </span>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        }
+                    }
+                    else
+                    {
+                        <div class="col-12">
+                            <p class="text-center text-muted">No products found matching your criteria.</p>
+                        </div>
+                    }
+                </div>
+                @*PHÂN TRANG *@
+            <div class="col-12 text-center mt-4">
+
+                @if (totalPages > 1)
+                {
+                    <nav>
+                        <ul class="pagination justify-content-center">
+                            @* Nút Previous *@
+                            @if (currentPage > 1)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("Index", new { page = currentPage - 1, categoryId = currentCatId })">Previous</a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="page-item disabled"><span class="page-link">Previous</span></li>
+                            }
+
+                            @* Danh sách số trang *@
+                            @for (int i = 1; i <= totalPages; i++)
+                            {
+                                <li class="page-item @(i == currentPage ? "active" : "")">
+                                    <a class="page-link" href="@Url.Action("Index", new { page = i, categoryId = currentCatId })">@i</a>
+                                </li>
+                            }
+
+                            @* Nút Next *@
+                            @if (currentPage < totalPages)
+                            {
+                                <li class="page-item">
+                                    <a class="page-link" href="@Url.Action("Index", new { page = currentPage + 1, categoryId = currentCatId })">Next</a>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="page-item disabled"><span class="page-link">Next</span></li>
+                            }
+                        </ul>
+                    </nav>
+                }
+            </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+

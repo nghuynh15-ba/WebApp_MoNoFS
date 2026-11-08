@@ -1,0 +1,530 @@
+﻿@{
+    // --- DI CHUYỂN LOGIC NÀY LÊN ĐẦU TRANG ĐỂ CODE HTML BÊN DƯỚI HIỂU ĐƯỢC ---
+    // Lấy tên Controller và Action hiện tại
+    string currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    string currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+
+    // Hàm kiểm tra active
+    string IsActive(string controller, string action)
+    {
+        if (string.Equals(currentController, controller, StringComparison.OrdinalIgnoreCase) &&
+            (string.IsNullOrEmpty(action) || string.Equals(currentAction, action, StringComparison.OrdinalIgnoreCase)))
+        {
+            return "active";
+        }
+        return "";
+    }
+
+
+}
+
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - MONO Fashion</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,500&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+    <link href="@Url.Content("~/Content/styles.css")" rel="stylesheet" />
+
+    <style>
+        /* --- BỔ SUNG CSS HIGHLIGHT MENU --- */
+        .navbar-nav .nav-link.active {
+            color: #c8a165 !important; /* Màu vàng đồng */
+            font-weight: 700;
+        }
+
+        /* --- SEARCH BAR DẠNG ICON MỞ RỘNG  --- */
+        .search-container {
+            position: relative;
+            /* margin-left: 15px; -> Bỏ margin này để căn đều hơn trong list */
+            z-index: 1000;
+        }
+
+        .search-form-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            width: 40px;
+            height: 40px;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: 50px;
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .search-form-wrapper form {
+            display: flex;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            margin: 0;
+        }
+
+        /* TRẠNG THÁI MỞ (Active) */
+        .search-form-wrapper.active {
+            width: 300px;
+            background: #fff;
+            border: 1px solid rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            cursor: default;
+        }
+
+        /* Ô INPUT */
+        .search-input {
+            flex-grow: 1;
+            width: 0;
+            height: 100%;
+            padding: 0;
+            background: transparent !important;
+            border: none !important;
+            outline: none;
+            color: #333;
+            font-size: 0.95rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.4s ease;
+            order: 1;
+        }
+
+        /* TRẠNG THÁI INPUT KHI MỞ */
+        .search-form-wrapper.active .search-input {
+            width: auto;
+            padding-left: 20px;
+            padding-right: 35px;
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* NÚT ICON SEARCH */
+        .btn-search-toggle {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: none;
+            border: none;
+            color: #fff; /* Mặc định màu trắng theo navbar-dark */
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: color 0.3s;
+            padding: 0;
+            outline: none;
+            order: 2;
+            flex-shrink: 0;
+        }
+
+        /* Khi hover hoặc active thì đổi màu */
+        .btn-search-toggle:hover,
+        .search-form-wrapper.active .btn-search-toggle {
+            color: #c8a165;
+        }
+
+        /* NÚT CLEAR VÀ LOADER */
+        .search-actions {
+            position: absolute;
+            right: 45px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 6;
+        }
+
+        .search-form-wrapper.active .search-actions {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .btn-clear-search {
+            display: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .btn-clear-search:hover {
+            color: #d9534f;
+        }
+
+        .search-loader {
+            display: none;
+            color: #c8a165;
+            animation: spin 1s linear infinite;
+        }
+
+        @@keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* CÁC PHẦN DROPDOWN GỢI Ý  */
+        .search-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 15px);
+            right: 0;
+            width: 320px;
+            background: #fff;
+            border-radius: 8px;
+            display: none;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            z-index: 9999;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid rgba(0,0,0,0.05);
+            padding: 10px 0;
+        }
+
+        .search-dropdown-menu::before {
+            content: '';
+            position: absolute;
+            top: -8px;
+            right: 14px;
+            border-width: 0 8px 8px 8px;
+            border-style: solid;
+            border-color: transparent transparent #fff transparent;
+        }
+
+        .suggestion-item {
+            padding: 10px 15px;
+            border-bottom: 1px solid #f5f5f5;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #333;
+            transition: 0.2s;
+        }
+
+        .suggestion-item:hover {
+            background-color: #f9f9f9;
+        }
+
+        .suggestion-img {
+            width: 45px;
+            height: 45px;
+            object-fit: cover;
+            border-radius: 4px;
+            margin-right: 12px;
+            border: 1px solid #eee;
+        }
+
+        .suggestion-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .suggestion-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #000;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .suggestion-price {
+            font-size: 0.85rem;
+            color: #c8a165;
+            font-weight: 700;
+        }
+
+        .no-result-msg {
+            text-align: center;
+            padding: 20px;
+            color: #999;
+            font-style: italic;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="top-bar d-flex align-items-center">
+        <div class="container d-flex justify-content-between align-items-center h-100">
+            <div class="top-bar-left">
+                <a href="@Url.Action("Index", "About")">About Us</a>
+                <a href="#">Privacy</a>
+                <a href="#">FAQ</a>
+                <a href="#">Careers</a>
+            </div>
+            <div class="top-bar-right d-flex align-items-center">
+                <a href="@Url.Action("GuestTracking", "Order")" title="Track Your Order" class="me-3">Track Your Order</a>
+                <div class="top-bar-social">
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="@Url.Action("Index", "Home")">
+                <img src="@Url.Content("~/Images/logo.png")" alt="MONO Fashion Logo" class="navbar-logo me-2">
+                MONO FASHION
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item"><a class="nav-link @IsActive("Home", "Index")" href="@Url.Action("Index", "Home")">Home</a></li>
+                    <li class="nav-item"><a class="nav-link @IsActive("Product", "Index")" href="@Url.Action("Index", "Product")">Products</a></li>
+                    <li class="nav-item"><a class="nav-link @IsActive("Blog", "Index")" href="@Url.Action("Index", "Blog")">Blog</a></li>
+                    <li class="nav-item"><a class="nav-link @IsActive("About", "Index")" href="@Url.Action("Index", "About")">About</a></li>
+                    <li class="nav-item"><a class="nav-link @IsActive("Contact", "Index")" href="@Url.Action("Index", "Contact")">Contact</a></li>
+                </ul>
+
+                <ul class="navbar-nav flex-row align-items-center">
+
+                    @* --- SEARCH BAR --- *@
+                    <li class="nav-item position-relative me-3">
+                        <div class="d-flex align-items-center position-relative search-container">
+                            <div class="search-form-wrapper" id="searchWrapper">
+                                <form class="w-100 h-100 align-items-center m-0" action="@Url.Action("Search", "Product")" method="get" id="searchForm">
+                                    <input class="search-input" type="text" placeholder="Type to search..." name="Name" id="txtSearch" autocomplete="off">
+                                    <div class="search-actions">
+                                        <i class="fas fa-spinner search-loader" id="searchLoader"></i>
+                                        <i class="fas fa-times btn-clear-search" id="btnClearSearch" title="Clear"></i>
+                                    </div>
+                                    <button class="btn-search-toggle" type="button" id="btnSearchToggle">
+                                        <i class="fas fa-search"></i>
+                                    </button>
+                                </form>
+                            </div>
+                            <div id="searchSuggestions" class="search-dropdown-menu animate__animated animate__fadeIn"></div>
+                        </div>
+                    </li>
+
+                    @* --- WISHLIST ICON --- *@
+                    <li class="nav-item position-relative me-3">
+                        <a class="nav-link px-2 @IsActive("Wishlist", "Index")" href="@Url.Action("Index", "Wishlist")" title="My Wishlist">
+                            <i class="fas fa-heart" style="font-size: 1.2rem;"></i>
+                            <span id="wishlist-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill shadow-sm" style="font-size: 0.65rem; background-color: #ff6b6b; border: 2px solid #fff; display: none;">0</span>
+                        </a>
+                    </li>
+
+                    @* --- CART ICON --- *@
+                    <li class="nav-item position-relative me-3">
+                        <a class="nav-link px-2 @IsActive("Cart", "Index")" href="@Url.Action("Index", "Cart")" title="Shopping Cart">
+                            <i class="fas fa-shopping-cart" style="font-size: 1.2rem;"></i>
+                            <span id="cart-badge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill shadow-sm" style="font-size: 0.65rem; background-color: #c8a165; color: #fff; border: 2px solid #fff; display: none;">0</span>
+                        </a>
+                    </li>
+
+                    @{
+                        // 1. Mặc định là ảnh ở folder gốc
+                        var userImage = Url.Content("~/Images/avt.png");
+
+                        if (Session["User"] != null)
+                        {
+                            var photoName = Session["Photo"] as string;
+
+                            // 2. Chỉ khi có tên ảnh VÀ tên ảnh KHÁC "avt.png" thì mới lấy trong folder CUSTOMERS
+                            if (!string.IsNullOrEmpty(photoName) && photoName != "avt.png")
+                            {
+                                userImage = Url.Content("~/Images/CUSTOMERS/" + photoName);
+                            }
+                        }
+                    }
+
+                    @if (Session["User"] != null)
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link px-2 dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                <span class="me-2 fw-bold" style="color: #c8a165;">@Session["Username"]</span>
+                                <img src="@userImage" class="rounded-circle border" style="width: 35px; height: 35px; object-fit: cover; border-color: #c8a165 !important;" alt="User Avatar">
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="@Url.Action("Info", "Account")">My Profile</a></li>
+                                <li><a class="dropdown-item" href="@Url.Action("MyOrders", "Order")">Order History</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    @using (Html.BeginForm("Logoff", "Account", FormMethod.Post, new { id = "logoutForm", @class = "m-0" }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <a class="dropdown-item" href="javascript:document.getElementById('logoutForm').submit()">Log out</a>
+                                    }
+                                </li>
+                            </ul>
+                        </li>
+                    }
+                    else
+                    {
+                        <li class="nav-item"><a class="nav-link px-2 @IsActive("Account", "Login")" href="@Url.Action("Login", "Account")"><i class="fas fa-user"></i></a></li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    @RenderBody()
+
+    <a href="#" id="scrollToTopBtn" title="TOP TO ..."><i class="fas fa-arrow-up"></i></a>
+
+    <footer class="site-footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-5 col-md-12 mb-4 mb-lg-0">
+                    <h5 class="footer-title d-flex align-items-center mb-3">
+                        <img src="@Url.Content("~/Images/logo.png")" alt="Logo" class="navbar-logo me-2 footer-logo"> MONO FASHION
+                    </h5>
+                    <p class="footer-about">Crafting timeless fashion with a minimalist aesthetic.</p>
+                    <div class="footer-social-icons">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fas fa-envelope"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6 mb-4 mb-lg-0">
+                    <h5 class="footer-title">Explore</h5>
+                    <ul class="footer-links list-unstyled">
+                        <li><a href="@Url.Action("Index", "Home")">Home</a></li>
+                        <li><a href="@Url.Action("Index", "Product")">Products</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="footer-title">Newsletter</h5>
+                    <form class="newsletter-form"><input type="email" placeholder="Email"><button type="submit">Subscribe</button></form>
+                </div>
+            </div>
+            <hr class="footer-divider">
+            <div class="row"><div class="col-12 text-center footer-bottom"><p>&copy; @DateTime.Now.Year MONO Fashion. All Rights Reserved.</p></div></div>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="@Url.Content("~/Scripts/mono-main.js")"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    @RenderSection("scripts", required: false)
+
+    @* --- Code Script JS giữ nguyên --- *@
+    <script>
+        // Hàm gọi về Server để lấy số lượng (Giữ nguyên)
+        function updateHeaderCounts() {
+            $.ajax({
+                url: '/Cart/GetHeaderCounts',
+                type: 'GET',
+                success: function (data) {
+                    var wishBadge = document.getElementById('wishlist-badge');
+                    if (wishBadge) {
+                        if (data.WishlistCount > 0) {
+                            wishBadge.innerText = data.WishlistCount;
+                            wishBadge.style.display = 'inline-block';
+                        } else { wishBadge.style.display = 'none'; }
+                    }
+                    var cartBadge = document.getElementById('cart-badge');
+                    if (cartBadge) {
+                        if (data.CartCount > 0) {
+                            cartBadge.innerText = data.CartCount;
+                            cartBadge.style.display = 'inline-block';
+                        } else { cartBadge.style.display = 'none'; }
+                    }
+                }
+            });
+        }
+        window.addEventListener('load', function () { updateHeaderCounts(); });
+    </script>
+
+    <script>
+        $(document).ready(function () {
+            let timeout = null;
+            const $wrapper = $('#searchWrapper');
+            const $input = $('#txtSearch');
+            const $suggestions = $('#searchSuggestions');
+            const $loader = $('#searchLoader');
+            const $btnClear = $('#btnClearSearch');
+            const $btnToggle = $('#btnSearchToggle');
+            const $form = $('#searchForm');
+
+            // --- GIỮ NGUYÊN LOGIC JS CỦA BẠN ---
+            $btnToggle.on('click', function (e) {
+                if (!$wrapper.hasClass('active')) {
+                    e.preventDefault();
+                    $wrapper.addClass('active');
+                    setTimeout(() => $input.focus(), 100);
+                } else {
+                    if ($input.val().trim() !== "") { $form.submit(); }
+                    else { $input.focus(); }
+                }
+            });
+
+            $(document).on('click', function (e) {
+                if (!$(e.target).closest('.search-container').length) {
+                    if ($input.val().trim() === "") {
+                        $wrapper.removeClass('active');
+                        $suggestions.slideUp(200);
+                        $btnClear.hide();
+                    }
+                }
+            });
+
+            $btnClear.on('click', function () {
+                $input.val('').focus();
+                $suggestions.slideUp(200);
+                $(this).hide();
+            });
+
+            $input.on('input', function () {
+                var keyword = $(this).val().trim();
+                if (keyword.length > 0) { $btnClear.show(); }
+                else {
+                    $btnClear.hide();
+                    $suggestions.slideUp(200);
+                    return;
+                }
+                clearTimeout(timeout);
+                $loader.show();
+                $btnClear.hide();
+                timeout = setTimeout(function () {
+                    $.ajax({
+                        url: '/Product/GetSearchSuggestions',
+                        type: 'GET',
+                        data: { term: keyword },
+                        success: function (data) {
+                            $suggestions.empty();
+                            $loader.hide();
+                            $btnClear.show();
+                            if (data.length > 0) {
+                                $.each(data, function (index, item) {
+                                    let price = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 }).format(item.price);
+                                    let html = `<a href="/Product/Detail/${item.id}" class="suggestion-item">
+                                                            <img src="/Images/${item.image}" class="suggestion-img" alt="${item.name}">
+                                                            <div class="suggestion-info">
+                                                                <h6 class="suggestion-title">${item.name}</h6>
+                                                                <span class="suggestion-price">${price}</span>
+                                                            </div>
+                                                        </a>`;
+                                    $suggestions.append(html);
+                                });
+                            } else {
+                                $suggestions.html('<div class="no-result-msg"><i class="far fa-frown me-2"></i>No products found.</div>');
+                            }
+                            $suggestions.slideDown(200);
+                        },
+                        error: function () { $loader.hide(); $btnClear.show(); }
+                    });
+                }, 400);
+            });
+        });
+    </script>
+
+    @Html.Partial("_PopupOrderSuccess")
+
+</body>
+</html>

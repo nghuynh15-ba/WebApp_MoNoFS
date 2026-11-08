@@ -1,0 +1,297 @@
+﻿@model WebApp_MoNoFS.Models.Order
+@{
+    ViewBag.Title = "CheckOut";
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+
+
+
+<section class="py-5" style="background-color: #f8f9fa;">
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-12">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="@Url.Action("Index", "Cart")" class="text-decoration-none text-muted">Cart</a></li>
+                        <li class="breadcrumb-item active fw-bold text-dark" aria-current="page">Checkout</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+        <div class="row justify-content-center">
+            <div class="col-lg-7 mb-4 mb-lg-0">
+                <div class="card border-0 shadow-sm rounded-3">
+                    <div class="card-header bg-white border-bottom py-3">
+                        <h5 class="mb-0 fw-bold text-uppercase"><i class="fas fa-shipping-fast me-2 text-warning"></i> Shipping Details</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        @using (Html.BeginForm("Checkout", "Order", FormMethod.Post, new { id = "checkoutForm" }))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+
+                            <input type="hidden" id="isForcedGuest" name="isForcedGuest" value="false" />
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-12">
+                                    <label class="form-label fw-bold small text-muted">FULL NAME</label>
+                                    @Html.EditorFor(model => model.CustomerName, new { htmlAttributes = new { @class = "form-control form-control-lg", required = "required", placeholder = "e.g. Nguyen Van A" } })
+                                    @Html.ValidationMessageFor(model => model.CustomerName, "", new { @class = "text-danger small" })
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small text-muted">PHONE NUMBER</label>
+                                    @Html.EditorFor(model => model.CustomerPhone, new { htmlAttributes = new { @class = "form-control", required = "required", placeholder = "e.g. 0912..." } })
+                                    @Html.ValidationMessageFor(model => model.CustomerPhone, "", new { @class = "text-danger small" })
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label fw-bold small text-muted">EMAIL ADDRESS</label>
+                                    @Html.EditorFor(model => model.CustomerEmail, new { htmlAttributes = new { @class = "form-control", placeholder = "name@example.com" } })
+                                    @Html.ValidationMessageFor(model => model.CustomerEmail, "", new { @class = "text-danger small" })
+                                </div>
+                            </div>
+
+                            <hr class="text-muted my-4">
+
+                            <h6 class="fw-bold mb-3">Address Information</h6>
+                            <div class="row g-3 mb-3">
+                                <div class="col-md-4">
+                                    <label class="form-label small text-muted">Province / City</label>
+                                    <select class="form-select" id="province" required>
+                                        <option value="">Select Province</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small text-muted">District</label>
+                                    <select class="form-select" id="district" required disabled>
+                                        <option value="">Select District</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label small text-muted">Ward</label>
+                                    <select class="form-select" id="ward" required disabled>
+                                        <option value="">Select Ward</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label small text-muted">Street Name, Building, House No.</label>
+                                <input type="text" class="form-control" id="streetInput" placeholder="e.g. 123 Le Loi Street" required>
+                            </div>
+
+                            @Html.HiddenFor(model => model.CustomerAddress, new { id = "fullAddress" })
+
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-dark btn-lg py-3 fw-bold text-uppercase">
+                                    Confirm Order
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card border-0 shadow-sm rounded-3 bg-white">
+                    <div class="card-header bg-light border-bottom py-3">
+                        <h5 class="mb-0 fw-bold">ORDER SUMMARY</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        @{
+                            var cart = Session["WebApp_MoNoFS_Cart"] as List<WebApp_MoNoFS.Models.CartItem>;
+                        }
+
+                        @if (cart != null && cart.Any())
+                        {
+                            <ul class="list-group list-group-flush mb-3">
+                                @foreach (var item in cart)
+                                {
+                                    <li class="list-group-item d-flex justify-content-between align-items-center px-0 py-3">
+                                        <div class="d-flex align-items-center">
+                                            @* 1. Số lượng *@
+                                            <span class="badge bg-secondary rounded-pill me-3" style="min-width: 25px;">@item.Quantity</span>
+
+                                            @* 2. Tên sản phẩm và Size (Xếp dọc) *@
+                                            <div class="d-flex flex-column">
+                                                <span class="fw-bold text-dark text-truncate" style="max-width: 180px;" title="@item.ProName">
+                                                    @item.ProName
+                                                </span>
+
+                                                @* --- HIỂN THỊ SIZE Ở ĐÂY --- *@
+                                                <small class="text-muted" style="font-size: 0.85rem;">
+                                                    Size: <span class="fw-bold text-dark">@item.Size</span>
+                                                </small>
+                                            </div>
+                                        </div>
+
+                                        @* 3. Thành tiền *@
+                                        <span class="fw-bold text-end">
+                                            @string.Format(System.Globalization.CultureInfo.GetCultureInfo("en-US"), "{0:C0}", item.SubTotal)
+                                        </span>
+                                    </li>
+                                }
+                            </ul>
+
+                            <hr>
+
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Subtotal</span>
+                                <span class="fw-bold">@string.Format(System.Globalization.CultureInfo.GetCultureInfo("en-US"), "{0:C0}", cart.Sum(x => x.SubTotal))</span>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span class="text-muted">Shipping</span>
+                                <span class="text-success fw-bold">Free</span>
+                            </div>
+                            <div class="d-flex justify-content-between mt-3 pt-3 border-top">
+                                <h5 class="fw-bold">TOTAL</h5>
+                                <h4 class="fw-bold text-danger">@string.Format(System.Globalization.CultureInfo.GetCultureInfo("en-US"), "{0:C0}", cart.Sum(x => x.SubTotal))</h4>
+                            </div>
+                        }
+
+                        <div class="mt-4 p-3 bg-light rounded border">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="paymentMethod" id="cod" checked>
+                                <label class="form-check-label fw-bold" for="cod">
+                                    Cash on Delivery (COD)
+                                </label>
+                                <div class="text-muted small mt-1">Pay with cash upon delivery.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="modal fade" id="duplicateCustomerModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-warning text-dark border-0">
+                <h5 class="modal-title fw-bold">
+                    <i class="fas fa-exclamation-circle me-2"></i> Account Found
+                </h5>
+            </div>
+            <div class="modal-body text-center p-4">
+                @if (ViewBag.FoundExistingCustomer != null)
+                {
+                    var cus = ViewBag.FoundExistingCustomer as WebApp_MoNoFS.Models.Customer;
+                    <p class="fs-5 mb-3">
+                        We found an account <strong>@cus.Fullname</strong> with this phone number and email.
+                    </p>
+                }
+                <p class="text-muted mb-4">Would you like to login to earn points and track your order easily?</p>
+
+                <div class="d-grid gap-2">
+                    <a href="@Url.Action("Login", "Account")" class="btn btn-dark fw-bold py-2">
+                        Yes, Login Now
+                    </a>
+
+                    <button type="button" class="btn btn-outline-secondary" onclick="forceSubmitAsGuest()">
+                        No, Continue as Guest
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+    // 1. SCRIPT XỬ LÝ MODAL TRÙNG KHÁCH HÀNG
+    function forceSubmitAsGuest() {
+        // Đổi giá trị input ẩn thành TRUE
+        document.getElementById('isForcedGuest').value = 'true';
+        // Submit form lại lần nữa (Lần này Server sẽ cho qua)
+        document.getElementById('checkoutForm').submit();
+    }
+
+    // Tự động hiện Modal nếu Server trả về cờ báo trùng
+    @if (ViewBag.FoundExistingCustomer != null)
+    {
+        <text>
+        window.addEventListener('load', function() {
+            var myModal = new bootstrap.Modal(document.getElementById('duplicateCustomerModal'));
+            myModal.show();
+        });
+        </text>
+    }
+
+    // 2. SCRIPT XỬ LÝ ĐỊA CHỈ 
+    $(document).ready(function () {
+        // API lấy địa chỉ của ESGOO
+        const apiBase = "https://esgoo.net/api-tinhthanh";
+
+        // --- Load Tỉnh/Thành ---
+        $.getJSON(apiBase + "/1/0.htm", function (data) {
+            if (data.error === 0) {
+                renderOptions(data.data, "province");
+            }
+        });
+
+        // --- Chọn Tỉnh -> Load Quận/Huyện ---
+        $("#province").change(function () {
+            var provinceId = $(this).find(':selected').data('id');
+            if (provinceId) {
+                $.getJSON(apiBase + "/2/" + provinceId + ".htm", function (data) {
+                    if (data.error === 0) {
+                        renderOptions(data.data, "district");
+                        $("#district").prop("disabled", false);
+                        $("#ward").prop("disabled", true).html('<option value="">Select Ward</option>');
+                    }
+                });
+            } else {
+                $("#district").prop("disabled", true).html('<option value="">Select District</option>');
+                $("#ward").prop("disabled", true).html('<option value="">Select Ward</option>');
+            }
+        });
+
+        // --- Chọn Quận/Huyện -> Load Phường/Xã ---
+        $("#district").change(function () {
+            var districtId = $(this).find(':selected').data('id');
+            if (districtId) {
+                $.getJSON(apiBase + "/3/" + districtId + ".htm", function (data) {
+                    if (data.error === 0) {
+                        renderOptions(data.data, "ward");
+                        $("#ward").prop("disabled", false);
+                    }
+                });
+            } else {
+                $("#ward").prop("disabled", true).html('<option value="">Select Ward</option>');
+            }
+        });
+
+        // Hàm render Option dùng chung
+        function renderOptions(array, selectId) {
+            let row = '<option value="">Select</option>';
+            array.forEach(function (element) {
+                // API này dùng 'id' và 'full_name'
+                row += `<option data-id="${element.id}" value="${element.full_name}">${element.full_name}</option>`;
+            });
+            $("#" + selectId).html(row);
+        }
+
+        // --- Gộp địa chỉ trước khi submit ---
+        $("#checkoutForm").submit(function (e) {
+            if ($('#isForcedGuest').val() === 'true') return true;
+
+            let street = $("#streetInput").val();
+            let ward = $("#ward option:selected").text();
+            let district = $("#district option:selected").text();
+            let province = $("#province option:selected").text();
+
+            // Kiểm tra xem người dùng đã chọn đủ chưa (Khác chữ 'Select')
+            if (street && ward !== "Select" && district !== "Select" && province !== "Select") {
+                let fullAddress = `${street}, ${ward}, ${district}, ${province}`;
+                $("#fullAddress").val(fullAddress);
+                return true;
+            } else {
+                alert("Please select full address information.");
+                e.preventDefault();
+                return false;
+            }
+        });
+    });
+    
+</script>

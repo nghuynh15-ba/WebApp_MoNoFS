@@ -1,0 +1,529 @@
+﻿@using WebApp_MoNoFS.Models
+@model WebApp_MoNoFS.Models.Product
+
+@{
+    ViewBag.Title = Model.ProName;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var relatedProducts = ViewBag.RelatedProducts as List<WebApp_MoNoFS.Models.Product>;
+
+    var wishlistIds = ViewBag.WishlistProIds as List<int> ?? new List<int>();
+
+    var sizeList = new List<string> ();
+
+    if (Model.Category != null)
+    {
+        
+        bool isAccessories = (Model.Category.CatId == 3 || Model.Category.ParentId == 3);
+
+        if (!isAccessories)
+        {
+            // Nếu KHÔNG PHẢI phụ kiện -> Thì mới hiện Size quần áo
+            sizeList = new List<string> { "S", "M", "L", "XL" };
+        }
+        
+    }
+
+    // --- LOGIC XỬ LÝ ẢNH & VIDEO ---
+    var mediaList = new List<string>();
+    if (!string.IsNullOrEmpty(Model.ProImage)) { mediaList.Add(Model.ProImage); }
+    if (Model.ProductImages != null && Model.ProductImages.Count > 0)
+    {
+        foreach (var item in Model.ProductImages.OrderBy(x => x.DisplayOrder))
+        {
+            mediaList.Add(item.ImageName);
+        }
+    }
+
+
+}
+
+<style>
+    body, h1, h2, h3, h4, h5, p, span, a, button, div {
+        font-family: "Inter", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+    }
+
+    /* --- 1. ẨN HEADER/NAVBAR CỦA LAYOUT --- */
+    header, nav.navbar, .site-header, .navigation, .top-bar {
+        display: none !important;
+    }
+
+    /* --- 2. NÚT QUAY VỀ --- */
+    .back-nav-container {
+        padding: 20px 50px;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #eee;
+        background: #fff;
+    }
+
+    .btn-back-product {
+        text-decoration: none;
+        color: #000;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        transition: 0.3s;
+    }
+
+        .btn-back-product:hover {
+            color: #c8a165;
+        }
+
+    /* --- 3. LAYOUT & HÌNH ẢNH --- */
+    .product-detail-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: flex-start;
+        padding-top: 30px;
+    }
+
+    .col-media {
+        width: 60%;
+        padding-right: 50px;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .media-item {
+        width: 100%;
+        background-color: #f9f9f9;
+    }
+
+        .media-item img, .media-item video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+    .col-info {
+        width: 40%;
+        position: -webkit-sticky;
+        position: sticky;
+        top: 20px;
+        z-index: 9;
+        padding-left: 10px;
+    }
+
+    /* --- 4. THÔNG TIN SẢN PHẨM --- */
+    .product-name-detail {
+        font-family: "Times New Roman", serif;
+        font-size: 2.2rem;
+        font-weight: 400;
+        margin-bottom: 10px;
+        line-height: 1.2;
+    }
+
+    .product-price-detail {
+        font-size: 1.3rem;
+        font-weight: 500;
+        color: #000;
+        margin-bottom: 30px;
+        display: block;
+    }
+
+    .btn-dior-add {
+        background-color: #000;
+        color: #fff;
+        border: 1px solid #000;
+        width: 100%;
+        padding: 16px;
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 1px;
+        transition: 0.3s;
+        cursor: pointer;
+    }
+
+        .btn-dior-add:hover {
+            background-color: #fff;
+            color: #000;
+        }
+
+    /* --- 5. STYLE MỚI CHO BỘ TĂNG GIẢM SỐ LƯỢNG (QUANTITY) --- */
+    .quantity-wrapper-custom {
+        display: flex;
+        align-items: center;
+        border: 1px solid #e1e1e1;
+        width: 140px; 
+        height: 45px;
+        margin-bottom: 20px;
+    }
+
+    .btn-qty {
+        width: 40px;
+        height: 100%;
+        border: none;
+        background: transparent;
+        font-size: 18px;
+        cursor: pointer;
+        color: #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: 0.2s;
+    }
+
+        .btn-qty:hover {
+            background-color: #f5f5f5;
+            color: #000;
+        }
+
+    .input-qty {
+        width: 60px;
+        height: 100%;
+        border: none;
+        text-align: center;
+        font-weight: 600;
+        font-size: 16px;
+        color: #000;
+        appearance: none;
+        -moz-appearance: textfield; 
+        background: transparent;
+    }
+        
+        .input-qty::-webkit-outer-spin-button,
+        .input-qty::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+    /* --- 6. CÁC STYLE PHỤ KHÁC --- */
+    .product-image-wrapper {
+        position: relative;
+        overflow: hidden;
+        border-radius: 5px;
+    }
+
+    .btn-add-to-cart-overlay {
+        width: 100%;
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        opacity: 0;
+        transform: translateY(100%);
+        transition: all 0.3s ease-in-out;
+        background-color: #c8a165;
+        border: none;
+        padding: 12px;
+    }
+
+    .product-card:hover .btn-add-to-cart-overlay {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .product-info-text {
+        text-align: center;
+        padding-top: 15px;
+    }
+
+    .product-name a {
+        font-family: 'Times New Roman', serif;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #002f34;
+        text-decoration: none;
+        text-transform: capitalize;
+        display: block;
+        margin-bottom: 5px;
+        transition: 0.3s;
+    }
+
+        .product-name a:hover {
+            color: #c8a165;
+        }
+
+    .price {
+        font-family: sans-serif;
+        font-weight: 900;
+        font-size: 1.2rem;
+        color: #000;
+    }
+
+    .wishlist-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background: rgba(255, 255, 255, 0.9);
+        border: none;
+        border-radius: 50%;
+        width: 35px;
+        height: 35px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        z-index: 2;
+        transition: 0.2s;
+        color: #999;
+    }
+
+   .wishlist-btn:hover {
+            color: #ff0000;
+        }
+
+    .btn-add-to-cart-overlay {
+        width: auto !important; 
+        left: 10px !important; 
+        right: 10px !important;
+        bottom: 10px !important; 
+        border-radius: 4px !important; 
+       
+        position: absolute;
+        opacity: 0;
+        transform: translateY(20px); 
+        transition: all 0.3s ease-in-out;
+        background-color: #c8a165;
+        border: none;
+        padding: 10px;
+        color: #fff;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    
+    .product-image-wrapper:hover .btn-add-to-cart-overlay {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    /* --- 7. STYLE CHO SIZE SELECTOR --- */
+    .size-wrapper {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    /* Ẩn nút radio tròn mặc định */
+    .btn-check {
+        position: absolute;
+        clip: rect(0,0,0,0);
+        pointer-events: none;
+    }
+
+    .lbl-size {
+        min-width: 45px;
+        height: 45px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid #e1e1e1;
+        background: #fff;
+        color: #000;
+        font-weight: 500;
+        cursor: pointer;
+        transition: 0.2s;
+        padding: 0 10px;
+        font-size: 14px;
+        text-transform: uppercase;
+    }
+
+        .lbl-size:hover {
+            border-color: #000;
+        }
+
+    /* Khi được chọn */
+    .btn-check:checked + .lbl-size {
+        background-color: #000;
+        color: #fff;
+        border-color: #000;
+    }
+</style>
+
+<div class="back-nav-container">
+    <a href="@Url.Action("Index", "Product")" class="btn-back-product">
+        <i class="fas fa-arrow-left"></i> Back to Products
+    </a>
+</div>
+
+<div class="container-fluid px-lg-5 mb-5">
+    <div class="product-detail-wrapper">
+        <div class="col-media">
+            @if (mediaList.Any())
+            {
+                foreach (var path in mediaList)
+                {
+                    <div class="media-item">
+                        @if (path.EndsWith(".mp4", StringComparison.OrdinalIgnoreCase) || path.EndsWith(".webm", StringComparison.OrdinalIgnoreCase))
+                        {
+                            <video autoplay muted loop playsinline><source src="@Url.Content("~/Images/" + path)" type="video/mp4"></video>
+                        }
+                        else
+                        {
+                            <img src="@Url.Content("~/Images/" + path)" alt="@Model.ProName" loading="lazy">
+                        }
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="media-item"><img src="https://via.placeholder.com/600x800?text=No+Image" /></div>
+            }
+        </div>
+
+        <div class="col-info">
+            <h1 class="product-name-detail">@Model.ProName</h1>
+            <span class="product-price-detail">
+                @(Model.ProPrice?.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("en-US")))
+            </span>
+
+            @using (Html.BeginForm("Add", "Cart", FormMethod.Post, new { id = "addToCartForm" }))
+            {
+                @Html.Hidden("id", Model.ProId)
+                @Html.Hidden("returnUrl", Request.RawUrl)
+
+
+        <div class="mb-4">
+            @* --- TRƯỜNG HỢP 1: QUẦN ÁO (Có danh sách Size) --- *@
+            @if (sizeList != null && sizeList.Any())
+            {
+                <label class="small text-uppercase fw-bold mb-2">Select Size</label>
+                <div class="size-wrapper">
+                    @foreach (var size in sizeList)
+                    {
+                        <input type="radio" class="btn-check" name="size" id="size_@size" value="@size" required>
+                        <label class="lbl-size" for="size_@size">@size</label>
+                    }
+                </div>
+            }
+            else
+            {
+                @* --- TRƯỜNG HỢP 2: PHỤ KIỆN (ID 3, 13, 14, 15...) --- *@
+                @* Ẩn phần chọn size đi, và âm thầm gửi chữ "One Size" về Server *@
+                <input type="hidden" name="size" value="One Size" />
+
+                <div class="alert alert-light border d-inline-block py-2 px-3">
+                    <i class="fas fa-info-circle text-muted me-2"></i>
+                    <span class="small fw-bold text-uppercase">One Size / Free Size</span>
+                </div>
+            }
+        </div>
+                <div class="mb-4">
+                    <label class="small text-uppercase fw-bold mb-2">Quantity</label>
+
+                    <div class="quantity-wrapper-custom">
+                        <button type="button" class="btn-qty" onclick="decreaseQty()">-</button>
+                        <input type="number" name="quantity" id="qtyInput" value="1" min="1" class="input-qty" readonly />
+                        <button type="button" class="btn-qty" onclick="increaseQty()">+</button>
+                    </div>
+
+                </div>
+
+                <button type="submit" class="btn-dior-add mb-3">Add to Cart</button>
+
+                if (User.Identity.IsAuthenticated)
+                {
+                    <a href="@Url.Action("Add", "Wishlist", new { productId = Model.ProId })" class="btn w-100 border-0 text-muted small text-uppercase text-decoration-none"><i class="far fa-heart me-1"></i> Add to Wishlist</a>
+                }
+            }
+
+            <div class="mt-4">
+                <p class="text-muted small" style="line-height: 1.6;">@Model.Description</p>
+                <div class="accordion accordion-flush mt-4 border-top" id="accordionProduct">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header"><button class="accordion-button collapsed shadow-none bg-transparent ps-0 small text-uppercase fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#flush-desc">Description</button></h2>
+                        <div id="flush-desc" class="accordion-collapse collapse" data-bs-parent="#accordionProduct"><div class="accordion-body ps-0 text-muted small">@Html.Raw(Model.Details)</div></div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header"><button class="accordion-button collapsed shadow-none bg-transparent ps-0 small text-uppercase fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#flush-fit">Size & Fit</button></h2>
+                        <div id="flush-fit" class="accordion-collapse collapse" data-bs-parent="#accordionProduct"><div class="accordion-body ps-0 text-muted small">@Html.Raw(Model.FitAndCare)</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section class="py-5 mt-5 bg-light">
+    <div class="container">
+        <h5 class="text-center text-uppercase fw-bold mb-5" style="letter-spacing: 2px;">You May Also Like</h5>
+
+        <div class="row product-grid justify-content-center">
+            @if (relatedProducts != null && relatedProducts.Any())
+            {
+                foreach (var product in relatedProducts)
+                {
+                    
+                    bool isInWishlist = wishlistIds.Contains(product.ProId);
+
+                    <div class="col-md-4 col-sm-6 mb-4">
+                   
+                        <div class="product-card d-flex flex-column h-100 text-center">
+
+                            <div class="product-image-wrapper mb-3 aspect-ratio">
+
+                               
+                                @if (isInWishlist)
+                                {
+                                    <a href="@Url.Action("Remove", "Wishlist", new { proId = product.ProId, returnUrl = Request.Url.PathAndQuery })"
+                                       class="wishlist-btn active"
+                                       title="Bỏ thích">
+                                        <i class="fas fa-heart"></i>
+                                    </a>
+                                }
+                                else
+                                {
+                                    <a href="@Url.Action("AddToWishlist", "Wishlist", new { proId = product.ProId, returnUrl = Request.Url.PathAndQuery })"
+                                       class="wishlist-btn"
+                                       title="Yêu thích">
+                                        <i class="far fa-heart"></i>
+                                    </a>
+                                }
+
+                                <a href="@Url.Action("Detail", "Product", new { id = product.ProId })">
+                                    <img src="@Url.Content("~/Images/" + product.ProImage)" alt="@product.ProName" class="img-fluid">
+                                </a>
+
+                                @using (Html.BeginForm("Add", "Cart", FormMethod.Post, new { @class = "add-to-cart-form-overlay" }))
+                                {
+                                    @Html.Hidden("id", product.ProId)
+                                    @Html.Hidden("quantity", 1)
+                                   
+
+                                    <button type="submit" class="btn btn-add-to-cart-overlay btn-product-overlay">
+                                        <i class="fas fa-shopping-cart"></i> Add to cart
+                                    </button>
+                                }
+                            </div>
+
+                            <div class="product-info-text mt-auto">
+                                <p class="product-name fw-bold mb-1">
+                                    <a href="@Url.Action("Detail", "Product", new { id = product.ProId })"
+                                       class="product-link">@product.ProName</a>
+                                </p>
+                                
+                                <span class="price d-block">
+                                    @(product.ProPrice?.ToString("C0", System.Globalization.CultureInfo.GetCultureInfo("en-US")))
+                                </span>
+                            </div>
+
+                        </div>
+                    </div>
+                }
+            }
+        </div>
+    </div>
+</section>
+
+<script>
+    function increaseQty() {
+        var qtyInput = document.getElementById('qtyInput');
+        var currentVal = parseInt(qtyInput.value);
+        if (!isNaN(currentVal)) {
+            qtyInput.value = currentVal + 1;
+        }
+    }
+
+    function decreaseQty() {
+        var qtyInput = document.getElementById('qtyInput');
+        var currentVal = parseInt(qtyInput.value);
+        if (!isNaN(currentVal) && currentVal > 1) {
+            qtyInput.value = currentVal - 1;
+        }
+    }
+</script>

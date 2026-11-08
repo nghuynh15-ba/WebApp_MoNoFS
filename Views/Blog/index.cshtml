@@ -1,0 +1,188 @@
+﻿@model List<WebApp_MoNoFS.Models.BlogPost>
+
+@using System.Web
+@using System.Linq
+
+@{
+    ViewBag.Title = "Blog";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var featuredProducts = ViewBag.FeaturedProducts as List<WebApp_MoNoFS.Models.Product>;
+    var parentCategories = ViewBag.ParentCategories as List<WebApp_MoNoFS.Models.Category>;
+
+
+    var currentUrl = Request.Url.AbsoluteUri;
+    var encodedUrl = System.Web.HttpUtility.UrlEncode(currentUrl);
+
+
+    List<string> requiredCategoryNames = new List<string> { "WOMEN", "MEN", "ACCESSORIES" };
+
+
+    var filteredCategories = parentCategories;
+
+
+    var allPosts = ViewBag.AllBlogPosts as List<WebApp_MoNoFS.Models.BlogPost>;
+    var blogArchive = allPosts?
+   
+    .Where(p => p.CreatedAt.HasValue)
+
+    
+    .GroupBy(p => new { p.CreatedAt.Value.Year, p.CreatedAt.Value.Month })
+
+    
+    .OrderByDescending(g => g.Key.Year)
+    .ThenByDescending(g => g.Key.Month)
+
+    
+    .Select(g => new
+    {
+        Month = g.Key.Month,
+        Year = g.Key.Year,
+        Count = g.Count(), 
+        Date = new DateTime(g.Key.Year, g.Key.Month, 1)
+    })
+    .ToList();
+    }
+
+<section class="blog-hero-section">
+    <div class="container">
+        <h1 class="blog-title">MONO STYLE GUIDE</h1>
+        <p class="blog-subtitle">
+            Fashion trends, timeless styles, and ethical production insights.
+        </p>
+    </div>
+</section>
+
+<section class="py-5 blog-content-section">
+    <div class="container">
+        <div class="row">
+
+            <div class="col-lg-8">
+
+                @if (Model != null && Model.Any())
+                {
+                    foreach (var post in Model)
+                    {
+
+
+                        <article class="blog-post mb-5">
+                            @if (!string.IsNullOrEmpty(post.ImageUrl))
+                            {
+                                <img src="@Url.Content("~/Images/" + post.ImageUrl)"
+                                     alt="@post.Title" class="img-fluid blog-img mb-4">
+                            }
+
+                            <div class="post-meta mb-2">
+                                <span class="post-date">
+                                    @(post.CreatedAt.HasValue ?post.CreatedAt.Value.ToString("MMM dd, yyyy", System.Globalization.CultureInfo.GetCultureInfo("en-US")): "N/A")
+                                </span>
+                                | <span class="post-category">News</span>
+                            </div>
+
+                            <h2 class="post-title">@post.Title</h2>
+
+
+                            <a href="@Url.Action("Detail", "Blog", new { id = post.BlogId })" class="read-more-link">
+                                Continue Reading <i class="fas fa-long-arrow-alt-right"></i>
+                            </a>
+                        </article>
+                    }
+                }
+                else
+                {
+                    <p>No blog posts found.</p>
+                }
+
+            </div>
+
+            <div class="col-lg-4">
+                <aside class="blog-sidebar p-4">
+
+                    <div class="widget mb-4">
+                        <form class="sidebar-search-form">
+                            <input type="text" placeholder="Search blog...">
+                            <button type="submit"><i class="fas fa-search"></i></button>
+                        </form>
+                    </div>
+
+
+
+                    <div class="widget mb-4">
+                        <h5 class="widget-title">Shop By</h5>
+                        <ul class="list-unstyled sidebar-list">
+                            <li><a href="@Url.Action("Index", "Product")">All Products</a></li>
+                            @if (parentCategories != null)
+                            {
+                                foreach (var cat in parentCategories)
+                                {
+                                    <li><a href="@Url.Action("Index", "Product", new { categoryId = cat.CatId })">@cat.CatName</a></li>
+                                }
+                            }
+                        </ul>
+                    </div>
+
+
+
+                    <div class="widget mb-4">
+                        <h5 class="widget-title">Featured Products</h5>
+
+                        @if (featuredProducts != null && featuredProducts.Any())
+                        {
+                            foreach (var prod in featuredProducts)
+                            {
+                                <div class="featured-product-sidebar d-flex mb-3">
+                                    <a href="@Url.Action("Detail", "Product", new { id = prod.ProId })">
+                                        <img src="@Url.Content("~/Images/" + prod.ProImage)"
+                                             alt="@prod.ProName" class="me-3" style="width: 70px; height: auto;">
+                                    </a>
+                                    <div>
+                                        <h6 class="product-sidebar-title">
+                                            <a href="@Url.Action("Detail", "Product", new { id = prod.ProId })" style="text-decoration:none; color: inherit;">
+                                                @prod.ProName
+                                            </a>
+                                        </h6>
+                                        <span class="price">@(prod.ProPrice?.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US")))</span>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+
+                    <div class="widget mb-4">
+                        <h5 class="widget-title">Archive</h5>
+                        <ul class="list-unstyled sidebar-list archive-list">
+                            @if (blogArchive != null)
+                            {
+                                foreach (var archiveItem in blogArchive)
+                                {
+                                    <li>
+                                       
+                                        <a href="#">
+                                            @archiveItem.Date.ToString("MMMM yyyy", System.Globalization.CultureInfo.GetCultureInfo("en-US"))
+                                            (@archiveItem.Count)
+                                        </a>
+                                    </li>
+                                }
+                            }
+                            else
+                            {
+                                <li>No archive data available.</li>
+                            }
+                        </ul>
+                    </div>
+
+                    <div class="widget mb-4">
+                        <h5 class="widget-title">Tags</h5>
+                        <div class="tag-cloud">
+                            <a href="#">Fashion</a>
+                            <a href="#">Lifestyle</a>
+                            <a href="#">Denim</a>
+                            <a href="#">Streetstyle</a>
+                        </div>
+                    </div>
+
+                </aside>
+            </div>
+        </div>
+    </div>
+</section>

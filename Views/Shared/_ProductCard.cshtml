@@ -1,0 +1,29 @@
+﻿
+@model WebApp_MoNoFS.Models.Product
+
+<div class="col-md-4 mb-4">
+    <div class="product-card" style="max-width: 400px; margin: 0 auto 20px; padding: 10px; border: 2px solid #c8a165; border-radius: 8px;">
+
+        <div class="product-image-wrapper mb-3" style="height: 180px; overflow: hidden;">
+
+            <img src="@Url.Content("~/Images/" + Model.ProImage)"
+                 alt="@Model.ProName"
+                 class="img-fluid"
+                 style="width: 100%; height: 100%; object-fit: contain;">
+
+        </div>
+
+        <h5 style="
+            font-family: 'Georgia', serif; 
+            font-size: 1.15rem;           
+            font-weight: 700;           
+            color: #333;                  
+            margin-top: 10px;            
+            margin-bottom: 5px;            
+            text-transform: uppercase;   
+            letter-spacing: 0.5px; ">
+            @Model.ProName
+        </h5>
+
+    </div>
+</div>

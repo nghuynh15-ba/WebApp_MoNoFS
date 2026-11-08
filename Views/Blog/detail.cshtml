@@ -1,0 +1,212 @@
+﻿@model WebApp_MoNoFS.Models.BlogPost
+@using System.Web
+@using System.Linq
+
+@{
+    ViewBag.Title = Model.Title;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var featuredProducts = ViewBag.FeaturedProducts as List<WebApp_MoNoFS.Models.Product>;
+    var parentCategories = ViewBag.ParentCategories as List<WebApp_MoNoFS.Models.Category>;
+
+    // Lấy URL hiện tại và mã hóa
+    var currentUrl = Request.Url.AbsoluteUri;
+    var encodedUrl = System.Web.HttpUtility.UrlEncode(currentUrl);
+
+    // Khắc phục lỗi: Cần định nghĩa encodedTitle
+    var encodedTitle = System.Web.HttpUtility.UrlEncode(Model.Title ?? string.Empty);
+
+
+    List<string> requiredCategoryNames = new List<string> { "WOMEN", "MEN", "ACCESSORIES" };
+
+    // Khắc phục lỗi: Khôi phục logic lọc
+    var filteredCategories = parentCategories?
+        .Where(cat => cat.CatName != null && requiredCategoryNames.Contains(cat.CatName.Trim().ToUpper()))
+        .ToList();
+
+    var allPosts = ViewBag.AllBlogPosts as List<WebApp_MoNoFS.Models.BlogPost>;
+    var blogArchive = allPosts?
+
+    .Where(p => p.CreatedAt.HasValue)
+
+
+    .GroupBy(p => new { p.CreatedAt.Value.Year, p.CreatedAt.Value.Month })
+
+
+    .OrderByDescending(g => g.Key.Year)
+    .ThenByDescending(g => g.Key.Month)
+
+
+    .Select(g => new
+    {
+        Month = g.Key.Month,
+        Year = g.Key.Year,
+        Count = g.Count(),
+        Date = new DateTime(g.Key.Year, g.Key.Month, 1)
+    })
+    .ToList();
+}
+
+
+<section class="blog-hero-section ">
+    <div class="container">
+
+
+        <h3 class="blog-title ">
+            @Model.Title
+        </h3>
+
+        <hr>
+        <p class="blog-subtitle text-white text-opacity-75 fs-6 mb-0">
+            
+            <span class="d-inline-block mx-3">
+                Published on <strong class="text-white">
+                    @(Model.CreatedAt.HasValue ? Model.CreatedAt.Value.ToString("MMM dd, yyyy", System.Globalization.CultureInfo.GetCultureInfo("en-US")): "N/A")
+                </strong>
+            </span>
+            <br />
+            <span class="d-inline-block mx-3">
+                By <strong class="text-white">MONOFASHION Team</strong>
+            </span>
+            
+        </p>
+
+    </div>
+</section>
+
+<section class="py-5 blog-content-section">
+    <div class="container">
+        <div class="row">
+
+            <div class="col-lg-8">
+
+                <article class="blog-post-detail">
+                    @if (!string.IsNullOrEmpty(Model.ImageUrl))
+                    {
+                        <img src="@Url.Content("~/Images/" + Model.ImageUrl)"
+                             alt="@Model.Title" class="img-fluid blog-img mb-4">
+                    }
+
+                    <div class="post-content">
+                        @Html.Raw(Model.Content)
+                    </div>
+
+
+                    <div class="social-share-widget mt-5 pt-3 border-top d-flex align-items-center">
+                        <span class="me-3 fw-bold text-uppercase">Share this Post:</span>
+
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=@encodedUrl" target="_blank"
+                           class="btn btn-social me-2 facebook-share">
+                            <i class="fab fa-facebook-f"></i>
+                        </a>
+
+                        <a href="https://twitter.com/intent/tweet?url=@encodedUrl&text=@encodedTitle" target="_blank"
+                           class="btn btn-social me-2 twitter-share">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+
+                        <a href="https://pinterest.com/pin/create/button/?url=@encodedUrl&media=@Url.Content("~/Images/" + Model.ImageUrl)&description=@encodedTitle" target="_blank"
+                           class="btn btn-social me-2 pinterest-share">
+                            <i class="fab fa-pinterest-p"></i>
+                        </a>
+
+                        <a href="https://www.linkedin.com/shareArticle?mini=true&url=@encodedUrl&title=@encodedTitle" target="_blank"
+                           class="btn btn-social me-2 linkedin-share">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                    </div>
+
+
+                </article>
+
+            </div>
+
+            <div class="col-lg-4">
+                <aside class="blog-sidebar p-4">
+
+                    <div class="widget mb-4">
+                        <form class="sidebar-search-form">
+                            <input type="text" placeholder="Search blog...">
+                            <button type="submit"><i class="fas fa-search"></i></button>
+                        </form>
+                    </div>
+
+
+                    <div class="widget mb-4">
+                        <h5 class="widget-title">Shop By</h5>
+                        <ul class="list-unstyled sidebar-list">
+                            <li><a href="@Url.Action("Index", "Product")">All Products</a></li>
+                            @if (filteredCategories != null)
+                            {
+                                foreach (var cat in filteredCategories)
+                                {
+                                    <li><a href="@Url.Action("Index", "Product", new { categoryId = cat.CatId })">@cat.CatName</a></li>
+                                }
+                            }
+                        </ul>
+                    </div>
+
+
+                    <div class="widget mb-4">
+                        <h5 class="widget-title">Featured Products</h5>
+
+                        @if (featuredProducts != null && featuredProducts.Any())
+                        {
+                            foreach (var prod in featuredProducts)
+                            {
+                                <div class="featured-product-sidebar d-flex mb-3">
+                                    <a href="@Url.Action("Detail", "Product", new { id = prod.ProId })">
+                                        <img src="@Url.Content("~/Images/" + prod.ProImage)"
+                                             alt="@prod.ProName" class="me-3" style="width: 70px; height: auto;">
+                                    </a>
+                                    <div>
+                                        <h6 class="product-sidebar-title">
+                                            <a href="@Url.Action("Detail", "Product", new { id = prod.ProId })" style="text-decoration:none; color: inherit;">
+                                                @prod.ProName
+                                            </a>
+                                        </h6>
+                                        <span class="price">@(prod.ProPrice?.ToString("C", System.Globalization.CultureInfo.GetCultureInfo("en-US")))</span>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+
+                    <div class="widget mb-4">
+                        <h5 class="widget-title">Archive</h5>
+                        <ul class="list-unstyled sidebar-list archive-list">
+                            @if (blogArchive != null)
+                            {
+                                foreach (var archiveItem in blogArchive)
+                                {
+                                    <li>
+                                     
+                                        <a href="#">
+                                            @archiveItem.Date.ToString("MMMM yyyy", System.Globalization.CultureInfo.GetCultureInfo("en-US"))
+                                            (@archiveItem.Count)
+                                        </a>
+                                    </li>
+                                }
+                            }
+                            else
+                            {
+                                <li>No archive data available.</li>
+                            }
+                        </ul>
+                    </div>
+
+                    <div class="widget mb-4">
+                        <h5 class="widget-title">Tags</h5>
+                        <div class="tag-cloud">
+                            <a href="#">Fashion</a>
+                            <a href="#">Lifestyle</a>
+                            <a href="#">Denim</a>
+                            <a href="#">Streetstyle</a>
+                        </div>
+                    </div>
+
+                </aside>
+            </div>
+        </div>
+    </div>
+</section>

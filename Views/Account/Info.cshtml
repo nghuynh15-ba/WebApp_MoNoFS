@@ -1,0 +1,134 @@
+﻿@model WebApp_MoNoFS.Models.Customer
+
+@{
+    ViewBag.Title = "My Account";
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+
+    string imgUrl = "";
+
+    if (string.IsNullOrEmpty(Model.Photo) || Model.Photo == "avt.png")
+    {
+        imgUrl = Url.Content("~/Images/avt.png");
+    }
+    else
+    {
+        imgUrl = Url.Content("~/Images/CUSTOMERS/" + Model.Photo);
+    }
+}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<div class="container my-5">
+    <div class="card shadow-sm p-4" style="max-width: 900px; margin: auto; border-radius: 12px;">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="form-title m-0">My Profile</h2>
+            <a href="@Url.Action("Index", "Home")" class="text-decoration-none text-muted">
+                <i class="fas fa-arrow-left me-1"></i> Back to Home
+            </a>
+        </div>
+        <hr />
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <script>
+                Swal.fire({
+                    icon: 'success', title: '@TempData["SuccessMessage"]', toast: true, position: 'bottom-end', showConfirmButton: false, timer: 3000, timerProgressBar: true
+                });
+            </script>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <script>
+                Swal.fire({
+                    icon: 'error', title: '@TempData["ErrorMessage"]', toast: true, position: 'bottom-end', showConfirmButton: false, timer: 4000, timerProgressBar: true
+                });
+            </script>
+        }
+
+        @using (Html.BeginForm("UpdateProfile", "Account", FormMethod.Post, new { enctype = "multipart/form-data" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.Hidden("UserId", Model.UserId)
+
+            <div class="row">
+                <div class="col-md-4 text-center mb-4">
+                    <div class="position-relative d-inline-block">
+                        <img src="@imgUrl" id="previewImage" class="rounded-circle border shadow-sm"
+                             style="width: 160px; height: 160px; object-fit: cover; border: 4px solid #fff;" />
+
+                        <label for="ImageFile" class="position-absolute bottom-0 end-0 text-white rounded-circle p-2 shadow"
+                               style="cursor: pointer; width: 45px; height: 45px; background-color: #c8a165; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-camera"></i>
+                        </label>
+                        <input type="file" name="ImageFile" id="ImageFile" class="d-none" onchange="previewFile()" accept="image/*" />
+                    </div>
+                    <h5 class="fw-bold mt-3">@Model.Username</h5>
+                    <span class="badge bg-success">Member</span>
+
+                    <div class="mt-4 d-grid gap-2 px-3">
+                        <a href="@Url.Action("ActivityLog", "Account")" class="btn btn-outline-secondary">
+                            <i class="fas fa-history me-2"></i> Activity History
+                        </a>
+                        <a href="@Url.Action("MyOrders", "Order")" class="btn btn-outline-secondary">
+                            <i class="fas fa-shopping-bag me-2"></i> My Orders
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Full Name</label>
+                        <input type="text" name="Fullname" class="form-control" value="@Model.Fullname" required maxlength="50" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Username</label>
+                        <input type="text" name="Username" class="form-control" value="@Model.Username" required maxlength="50" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Email</label>
+                        <input type="email" name="Email" class="form-control" value="@Model.Email" required maxlength="50" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Phone</label>
+                        <input type="text" name="Phone" class="form-control" value="@Model.Phone" maxlength="20" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">Address</label>
+                        <textarea name="Address" class="form-control" rows="3">@Model.Address</textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-end mt-4">
+                        <button type="button" onclick="resetProfile()" class="btn btn-outline-secondary me-2 px-4">RESET</button>
+                        <button type="submit" class="btn btn-warning text-white px-4">SAVE CHANGES</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<script>
+    var originalImageSrc = "@imgUrl";
+
+    function previewFile() {
+        var preview = document.getElementById('previewImage');
+        var file = document.getElementById('ImageFile').files[0];
+        if (file) {
+            var reader = new FileReader();
+            reader.onloadend = function () { preview.src = reader.result; }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function resetProfile() {
+        document.forms[0].reset();
+        document.getElementById('previewImage').src = originalImageSrc;
+        document.getElementById('ImageFile').value = "";
+    }
+</script>

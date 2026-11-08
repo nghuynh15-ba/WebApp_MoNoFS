@@ -1,0 +1,24 @@
+# Visual Studio / .NET Framework
+.vs/
+bin/
+obj/
+packages/
+*.user
+*.suo
+*.userprefs
+*.cache
+*.log
+TestResults/
+_ReSharper*/
+
+# Dữ liệu cục bộ
+App_Data/*.mdf
+App_Data/*.ldf
+
+# Secrets
+*.pubxml.user
+Web.*.local.config
+
+# Hệ điều hành
+.DS_Store
+Thumbs.db

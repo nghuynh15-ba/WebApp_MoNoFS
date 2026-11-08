@@ -1,0 +1,345 @@
+﻿@model List<WebApp_MoNoFS.Models.CartItem>
+
+@{
+    ViewBag.Title = "Shopping Cart";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<section class="cart-hero-section">
+    <div class="container">
+        <h1 class="cart-title">SHOPPING CART</h1>
+        <p class="cart-subtitle">Review your items and proceed to checkout.</p>
+    </div>
+</section>
+
+<section class="py-5 cart-content-section">
+    <div class="container">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="alert alert-info text-center py-5 shadow-sm border-0">
+                <i class="fas fa-shopping-basket fa-3x mb-3 text-muted"></i>
+                <h4 class="fw-bold">Your cart is currently empty.</h4>
+                <p class="text-muted">Looks like you haven't made your choice yet.</p>
+                @Html.ActionLink("Start Shopping", "Index", "Product", null, new { @class = "btn btn-dark mt-3 px-4 py-2 fw-bold" })
+            </div>
+        }
+        else
+        {
+            <div class="row">
+                @* --- CỘT TRÁI: DANH SÁCH SẢN PHẨM --- *@
+                <div class="col-lg-8 mb-5 mb-lg-0">
+                    <div class="cart-table-wrapper table-responsive shadow-sm border rounded">
+                        <table class="table align-middle cart-table mb-0">
+
+                            @* --- HEADER BẢNG --- *@
+                            <thead class="bg-light" style="border-bottom: 2px solid #000;">
+                                <tr style="font-family: 'Montserrat', sans-serif; font-size: 0.85rem; letter-spacing: 1px;">
+                                    <th scope="col" class="py-3 ps-4 text-uppercase text-secondary fw-bold border-0" style="width: 40%;">Product</th>
+                                    <th scope="col" class="py-3 text-center text-uppercase text-secondary fw-bold border-0" style="width: 15%;">Price</th>
+                                    <th scope="col" class="py-3 text-center text-uppercase text-secondary fw-bold border-0" style="width: 20%;">Quantity</th>
+                                    <th scope="col" class="py-3 text-end text-uppercase text-secondary fw-bold border-0" style="width: 15%;">Subtotal</th>
+                                    <th scope="col" class="py-3 pe-4 text-center text-uppercase text-secondary fw-bold border-0" style="width: 10%;"></th>
+                                </tr>
+                            </thead>
+
+                            @* --- BODY BẢNG --- *@
+                            <tbody>
+                                @foreach (var item in Model)
+                                {
+                                    <tr>
+                                        @* 1. Sản phẩm *@
+                                        <td class="ps-4 py-3">
+                                            <div class="d-flex align-items-center">
+                                                <div class="flex-shrink-0">
+                                                    <img src="@Url.Content("~/Images/" + item.ProImage)"
+                                                         alt="@item.ProName"
+                                                         class="img-fluid rounded border"
+                                                         style="width: 80px; height: 80px; object-fit: cover;">
+                                                </div>
+                                                <div class="flex-grow-1 ms-3">
+                                                    <h6 class="mb-1">
+                                                        <a href="@Url.Action("Detail", "Product", new { id = item.ProId })" class="text-dark text-decoration-none fw-bold text-truncate d-block" style="max-width: 200px;">
+                                                            @item.ProName
+                                                        </a>
+                                                    </h6>
+                                                    @* --- HIỂN THỊ SIZE  --- *@
+                                                    <small class="text-muted d-block">Size: <span class="fw-bold text-dark">@item.Size</span></small>
+                                                    <small class="text-muted">Code: #@item.ProId</small>
+                                                </div>
+                                            </div>
+                                        </td>
+
+                                        @* 2. Giá *@
+                                        <td class="text-center align-middle">
+                                            <span class="text-muted fw-medium">
+                                                @String.Format(System.Globalization.CultureInfo.GetCultureInfo("en-US"), "{0:C0}", item.UnitPrice)
+                                            </span>
+                                        </td>
+
+                                        @* 3. Số lượng *@
+                                        <td class="text-center align-middle">
+                                            <div class="input-group input-group-sm quantity-selector mx-auto" style="width: 110px;">
+                                                @* --- THÊM DATA-SIZE VÀO NÚT --- *@
+                                                <button type="button" class="btn btn-outline-secondary btn-decrease border-end-0"
+                                                        data-id="@item.ProId" data-size="@item.Size">
+                                                    -
+                                                </button>
+
+                                                <input type="number"
+                                                       name="quantity"
+                                                       value="@(item.Quantity > 0 ? item.Quantity : 1)"
+                                                       min="1"
+                                                       class="form-control text-center quantity-input bg-white border-secondary border-start-0 border-end-0"
+                                                       data-id="@item.ProId"
+                                                       readonly />
+
+                                                @* --- THÊM DATA-SIZE VÀO NÚT --- *@
+                                                <button type="button" class="btn btn-outline-secondary btn-increase border-start-0"
+                                                        data-id="@item.ProId" data-size="@item.Size">
+                                                    +
+                                                </button>
+                                            </div>
+                                        </td>
+
+                                        @* 4. Thành tiền *@
+                                        <td class="text-end align-middle">
+                                            <span class="fw-bold text-dark">
+                                                @String.Format(System.Globalization.CultureInfo.GetCultureInfo("en-US"), "{0:C0}", item.SubTotal)
+                                            </span>
+                                        </td>
+
+                                        @* 5. Nút Xóa  *@
+                                    <td class="text-center align-middle pe-4">
+                                        <a href="@Url.Action("Remove", "Cart", new { id = item.ProId, size = (string.IsNullOrEmpty(item.Size) ? "FreeSize" : item.Size) })"
+                                           class="text-danger text-decoration-none opacity-50 hover-opacity-100 transition btn-delete-item"
+                                           data-bs-toggle="tooltip"
+                                           title="Remove item"
+                                           data-name="@item.ProName"
+                                           data-size="@item.Size">
+
+                                            <i class="fas fa-trash-alt fa-lg"></i>
+                                        </a>
+                                    </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+
+                        <div class="d-flex justify-content-between align-items-center p-4 bg-light border-top">
+                            @Html.ActionLink("← Continue Shopping", "Index", "Product", null, new { @class = "text-decoration-none fw-bold text-dark" })
+                            <button class="btn btn-outline-dark update-cart-btn fw-bold" onclick="location.reload();">
+                                <i class="fas fa-sync-alt me-2"></i> Update Cart
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                @* --- CỘT PHẢI: TỔNG TIỀN --- *@
+                <div class="col-lg-4">
+                    <div class="cart-totals-box p-4 border rounded shadow-sm bg-white">
+                        <h5 class="totals-title mb-4 border-bottom pb-3 fw-bold text-uppercase" style="letter-spacing: 1px;">Cart Summary</h5>
+                        <table class="table totals-table mb-4">
+                            <tbody>
+                                <tr>
+                                    <th class="text-muted fw-normal">Subtotal</th>
+                                    <td class="text-end fw-bold" id="cart-subtotal">
+                                        @String.Format(System.Globalization.CultureInfo.GetCultureInfo("en-US"), "{0:C0}", Model.Sum(i => i.SubTotal))
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th class="text-muted fw-normal">Shipping</th>
+                                    <td class="text-end text-success fw-bold">Free Shipping</td>
+                                </tr>
+                                <tr class="border-top border-dark mt-3">
+                                    <th class="pt-3 fs-5">TOTAL</th>
+                                    <td class="text-end pt-3 fs-4 fw-bold text-danger" id="cart-total">
+                                        @String.Format(System.Globalization.CultureInfo.GetCultureInfo("en-US"), "{0:C0}", Model.Sum(i => i.SubTotal))
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="d-grid gap-2">
+                            @if (Session["UserId"] != null)
+                            {
+                                <button type="button" class="btn btn-dark btn-lg py-3 fw-bold text-uppercase" style="letter-spacing: 1px;" data-bs-toggle="modal" data-bs-target="#checkoutModal">
+                                    Proceed to Checkout
+                                </button>
+                            }
+                            else
+                            {
+                                @Html.ActionLink("PROCEED TO CHECKOUT", "Checkout", "Order", null, new { @class = "btn btn-dark btn-lg py-3 fw-bold text-uppercase", style = "letter-spacing: 1px;" })
+                            }
+                        </div>
+
+                        <div class="coupon-box mt-4 pt-4 border-top">
+                            <label class="form-label fw-bold small text-uppercase text-muted">Coupon Code</label>
+                            <div class="input-group">
+                                <input type="text" class="form-control" placeholder="Enter code">
+                                <button class="btn btn-outline-dark fw-bold">APPLY</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<style>
+    .hover-opacity-100:hover {
+        opacity: 1 !important;
+        transform: scale(1.1);
+    }
+
+    .transition {
+        transition: all 0.2s ease;
+    }
+</style>
+
+@* POP UP FOR OPTION ABOUT ORDER *@
+@if (Session["UserId"] != null)
+{
+    <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title fw-bold" id="checkoutModalLabel">ORDER OPTIONS</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center p-4">
+                    <p class="fs-5">
+                        Hello <strong>@(Session["Fullname"] != null ? Session["Fullname"] : Session["Username"])</strong>,
+                    </p>
+                    <p>Which shipping information would you like to use?</p>
+
+                    <div class="d-grid gap-2 mt-4">
+                        @using (Html.BeginForm("CheckoutDefault", "Order", FormMethod.Post))
+                        {
+                            <button type="submit" class="btn btn-dark w-100 fw-bold py-2">
+                                <i class="fas fa-user-check me-2"></i> Use Default Information
+                            </button>
+                        }
+
+                        <a href="@Url.Action("Checkout", "Order")" class="btn btn-outline-dark w-100 fw-bold py-2">
+                            <i class="fas fa-pen me-2"></i> Use Different Address
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        // --- Logic Xử lý nút Tăng (+) ---
+        document.querySelectorAll('.btn-increase').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const proId = this.getAttribute('data-id');
+                const proSize = this.getAttribute('data-size'); // LẤY SIZE
+                const input = this.parentElement.querySelector('.quantity-input');
+                let currentValue = parseInt(input.value);
+
+                // Tăng giá trị
+                input.value = currentValue + 1;
+
+                // Gửi request cập nhật
+                submitUpdateForm(proId, input.value, proSize);
+            });
+        });
+
+        // --- Logic Xử lý nút Giảm (-) ---
+        document.querySelectorAll('.btn-decrease').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const proId = this.getAttribute('data-id');
+                const proSize = this.getAttribute('data-size'); // LẤY SIZE
+                const input = this.parentElement.querySelector('.quantity-input');
+                let currentValue = parseInt(input.value);
+
+                if (currentValue > 1) {
+                    // Giảm giá trị
+                    input.value = currentValue - 1;
+
+                    // Gửi request cập nhật
+                    submitUpdateForm(proId, input.value, proSize);
+                }
+            });
+        });
+
+        // --- Hàm tạo form ảo để submit dữ liệu về Server ---
+        // Đã thêm tham số SIZE
+        function submitUpdateForm(id, quantity, size) {
+            // Tạo form ẩn
+            let form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '@Url.Action("Update", "Cart")';
+
+            // Tạo input chứa ID sản phẩm
+            let idField = document.createElement('input');
+            idField.type = 'hidden';
+            idField.name = 'id';
+            idField.value = id;
+            form.appendChild(idField);
+
+            // Tạo input chứa Số lượng
+            let qtyField = document.createElement('input');
+            qtyField.type = 'hidden';
+            qtyField.name = 'quantity';
+            qtyField.value = quantity;
+            form.appendChild(qtyField);
+
+            // QUAN TRỌNG: Tạo input chứa Size để Controller phân biệt
+            let sizeField = document.createElement('input');
+            sizeField.type = 'hidden';
+            sizeField.name = 'size';
+            sizeField.value = size;
+            form.appendChild(sizeField);
+
+            // Thêm form vào body và submit
+            document.body.appendChild(form);
+            form.submit();
+        }
+        const deleteButtons = document.querySelectorAll('.btn-delete-item');
+
+        deleteButtons.forEach(btn => {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                // 1. Tìm thẻ <a> chính xác (kể cả khi bấm vào icon bên trong)
+                const targetLink = e.target.closest('a');
+                if (!targetLink) return;
+
+                const deleteUrl = targetLink.getAttribute('href');
+                const productName = targetLink.getAttribute('data-name');
+                const productSize = targetLink.getAttribute('data-size');
+
+                // Debug: Kiểm tra xem lấy được link chưa (Bấm F12 -> Console để xem)
+                console.log("Delete URL:", deleteUrl);
+
+                // 2. Hiện Popup
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: `Do you want to remove "${productName}" (Size: ${productSize})?`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, remove it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // 3. Chuyển hướng
+                        if (deleteUrl) {
+                            window.location.href = deleteUrl;
+                        } else {
+                            Swal.fire('Error', 'Delete link not found!', 'error');
+                        }
+                    }
+                });
+            });
+        });
+    });
+</script>

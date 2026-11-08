@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="e4471e9e3d7f41aa883a80a27c5dffee" Name="Diagram1" ZoomLevel="82">
+        <EntityTypeShape EntityType="MoNoFSDBModel.BlogPost" Width="1.5" PointX="1" PointY="4.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="MoNoFSDBModel.Category" Width="1.5" PointX="6.375" PointY="4.625" IsExpanded="true" />
+        <EntityTypeShape EntityType="MoNoFSDBModel.ContactRequest" Width="1.5" PointX="2.625" PointY="6.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="MoNoFSDBModel.Customer" Width="1.5" PointX="3.125" PointY="2.375" IsExpanded="true" />
+        <EntityTypeShape EntityType="MoNoFSDBModel.Order" Width="1.5" PointX="8.5" PointY="5" IsExpanded="true" />
+        <EntityTypeShape EntityType="MoNoFSDBModel.OrderDetail" Width="1.5" PointX="11.25" PointY="5.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="MoNoFSDBModel.Product" Width="1.5" PointX="0.75" PointY="1" IsExpanded="true" />
+        <EntityTypeShape EntityType="MoNoFSDBModel.Review" Width="1.5" PointX="10.125" PointY="2.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="MoNoFSDBModel.Wishlist" Width="1.5" PointX="5.875" PointY="1.75" IsExpanded="true" />
+        <AssociationConnector Association="MoNoFSDBModel.FK__Category__Parent__5165187F" ManuallyRouted="false" />
+        <AssociationConnector Association="MoNoFSDBModel.FK__Product__CatId__5441852A" ManuallyRouted="false" />
+        <AssociationConnector Association="MoNoFSDBModel.FK__Order__UserId__619B8048" ManuallyRouted="false" />
+        <AssociationConnector Association="MoNoFSDBModel.FK__Reviews__UserId__5CD6CB2B" ManuallyRouted="false" />
+        <AssociationConnector Association="MoNoFSDBModel.FK__Wishlists__UserI__5812160E" ManuallyRouted="false" />
+        <AssociationConnector Association="MoNoFSDBModel.FK__OrderDeta__Order__6477ECF3" ManuallyRouted="false" />
+        <AssociationConnector Association="MoNoFSDBModel.FK__OrderDeta__Produ__656C112C" ManuallyRouted="false" />
+        <AssociationConnector Association="MoNoFSDBModel.FK__Reviews__Product__5DCAEF64" ManuallyRouted="false" ></AssociationConnector>
+        <AssociationConnector Association="MoNoFSDBModel.FK__Wishlists__Produ__59063A47" ManuallyRouted="false" />
+        <EntityTypeShape EntityType="MoNoFSDBModel.ProductImage" Width="1.5" PointX="4.5" PointY="6.25" />
+        <AssociationConnector Association="MoNoFSDBModel.FK_ProductImages_Product" />
+        <EntityTypeShape EntityType="MoNoFSDBModel.CustomerLog" Width="1.5" PointX="8" PointY="1.125" />
+        <AssociationConnector Association="MoNoFSDBModel.FK_CustomerLogs_Customers" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

@@ -1,0 +1,46 @@
+﻿@model WebApp_MoNoFS.Models.Order
+
+@{
+    ViewBag.Title = "Update Order Status";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid" style="max-width: 600px;">
+    <div class="card border-0 shadow-sm mt-5">
+        <div class="card-header bg-dark text-white rounded-0">
+            <h4 class="mb-0">Update Order Status #@Model.OrderId</h4>
+        </div>
+        <div class="card-body p-4">
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+                @Html.HiddenFor(m => m.OrderId)
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Customer</label>
+                    <input type="text" class="form-control rounded-0" value="@Model.CustomerName" disabled readonly />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Current Status</label>
+                    <input type="text" class="form-control rounded-0" value="@Model.Status" disabled readonly />
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-bold">New Status</label>
+                    <select name="Status" class="form-select rounded-0">
+                        @foreach (var status in (List<string>)ViewBag.StatusList)
+                        {
+                            <option value="@status" @(Model.Status == status ? "selected" : "")>@status</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a href="@Url.Action("Index")" class="btn btn-outline-secondary rounded-0">Cancel</a>
+                    <button type="submit" class="btn btn-dark rounded-0 px-4">Save Changes</button>
+                </div>
+            }
+        </div>
+    </div>
+</div>

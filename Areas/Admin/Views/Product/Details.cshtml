@@ -1,0 +1,56 @@
+﻿@model WebApp_MoNoFS.Models.Product
+
+@{
+    ViewBag.Title = "Product Details";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="page-title" style="font-family: 'Playfair Display', serif; font-weight: 700;">Product Details</h2>
+        <a href="@Url.Action("Index")" class="btn btn-outline-dark rounded-0">Back to List</a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+        <div class="card-body p-4">
+            <div class="row">
+                <div class="col-md-4 text-center">
+                    <img src="~/Images/@Model.ProImage" class="img-fluid border" style="max-height: 400px;" alt="@Model.ProName" onerror="this.src='https://placehold.co/400x400?text=No+Img'">
+                </div>
+                <div class="col-md-8">
+                    <h3 class="fw-bold mb-1">@Model.ProName</h3>
+                    <p class="text-muted small">ID: @Model.ProId</p>
+
+                    <h4 class="font-monospace mb-3" style="font-size: 1.5rem; font-weight: bold;">
+                        @String.Format(System.Globalization.CultureInfo.GetCultureInfo("en-US"), "{0:C0}", Model.ProPrice)
+                    </h4>
+
+                    <hr />
+
+                    <dl class="row">
+                        <dt class="col-sm-3 text-uppercase small text-muted">Category</dt>
+                        <dd class="col-sm-9 fw-bold">@Model.Category.CatName</dd>
+
+                        <dt class="col-sm-3 text-uppercase small text-muted mt-3">Description</dt>
+                        <dd class="col-sm-9 mt-3">@Html.Raw(Model.Description)</dd>
+
+                        <dt class="col-sm-3 text-uppercase small text-muted mt-3">Details</dt>
+                        <dd class="col-sm-9 mt-3">@Html.Raw(Model.Details)</dd>
+
+                        <dt class="col-sm-3 text-uppercase small text-muted mt-3">Fit & Care</dt>
+                        <dd class="col-sm-9 mt-3">@Html.Raw(Model.FitAndCare)</dd>
+                    </dl>
+
+                    <div class="mt-4 pt-3 border-top">
+                        <a href="@Url.Action("Edit", new { id = Model.ProId })" class="btn btn-dark rounded-0 px-4 me-2">
+                            <i class="fas fa-pen me-2"></i> Edit
+                        </a>
+                        <a href="@Url.Action("Delete", new { id = Model.ProId })" class="btn btn-outline-danger rounded-0 px-4">
+                            <i class="fas fa-trash me-2"></i> Delete
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

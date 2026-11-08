@@ -1,0 +1,39 @@
+﻿@model WebApp_MoNoFS.Models.Product
+
+@{
+    ViewBag.Title = "Delete Product";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="alert alert-light border-danger border-start border-4 rounded-0 text-danger" role="alert">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <strong>Warning!</strong> Are you sure you want to delete this product? This action cannot be undone.
+    </div>
+
+    <div class="card border-0 shadow-sm mt-4" style="max-width: 600px; margin: 0 auto;">
+        <div class="card-body p-5 text-center">
+
+            <img src="~/Images/@Model.ProImage" style="height: 150px; object-fit: contain;" class="mb-3 border bg-white p-2" />
+
+            <h3 class="fw-bold mb-1">@Model.ProName</h3>
+            <p class="text-muted mb-4">ID: @Model.ProId <span class="mx-2">|</span> Category: @Model.Category.CatName</p>
+
+            <div class="bg-light p-3 mb-4 rounded text-start">
+                <p class="mb-1"><small class="text-muted">Price:</small> <span class="font-monospace fw-bold">@String.Format(System.Globalization.CultureInfo.GetCultureInfo("en-US"), "{0:C0}", Model.ProPrice)</span></p>
+                <p class="mb-0"><small class="text-muted">Description:</small> @Model.Description</p>
+            </div>
+
+            @using (Html.BeginForm())
+            {
+                @Html.AntiForgeryToken()
+                <div class="d-flex justify-content-center gap-2">
+                    <a href="@Url.Action("Index")" class="btn btn-outline-dark rounded-0 px-4">Cancel</a>
+                    <button type="submit" class="btn btn-danger rounded-0 px-4">
+                        <i class="fas fa-trash-alt me-2"></i> Delete Permanently
+                    </button>
+                </div>
+            }
+        </div>
+    </div>
+</div>

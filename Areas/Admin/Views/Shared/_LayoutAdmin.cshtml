@@ -1,0 +1,93 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - MONO Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,500&family=Montserrat:wght@400;500&display=swap" rel="stylesheet">
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <link rel="stylesheet" href="~/Content/ad-styles.css">
+</head>
+
+<body>
+
+    <aside class="admin-sidebar">
+        <div class="sidebar-logo">
+            <img src="~/Images/logo.png" alt="MONO Fashion Logo" style="max-width: 100%;">
+            <span>MONO ADMIN</span>
+        </div>
+
+        <nav class="admin-nav">
+            <ul class="nav flex-column h-100">
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Home" ? "active" : "")"
+                       href="@Url.Action("index", "Home", new { area = "Admin" })">
+                        <i class="fas fa-tachometer-alt"></i> Dashboard
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Product" ? "active" : "")"
+                       href="@Url.Action("index", "Product", new { area = "Admin" })">
+                        <i class="fas fa-box-open"></i> Products
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Category" ? "active" : "")"
+                       href="@Url.Action("index", "Category", new { area = "Admin" })">
+                        <i class="fas fa-list"></i> Categories
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Order" ? "active" : "")"
+                       href="@Url.Action("index", "Order", new { area = "Admin" })">
+                        <i class="fas fa-shopping-cart"></i> Orders
+                    </a>
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link @(ViewContext.RouteData.Values["Controller"].ToString() == "Customer" ? "active" : "")"
+                       href="@Url.Action("index", "Customer", new { area = "Admin" })">
+                        <i class="fas fa-users"></i> Customers
+                    </a>
+                </li>
+
+                <li class="nav-item mt-5 pt-5 border-top border-secondary">
+                    <a class="nav-link" href="#"><i class="fas fa-cog"></i> Settings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-danger" href="@Url.Action("LogOff", "Account", new { area = "" })">
+                        <i class="fas fa-sign-out-alt"></i> Logout
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="admin-main-content">
+        <header class="content-header">
+            <h1>@ViewBag.Title</h1>
+            <div class="header-actions">
+                <span class="me-3">Have a productive day!</span>
+            </div>
+        </header>
+
+        <div class="container-fluid p-0">
+            @RenderBody()
+        </div>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

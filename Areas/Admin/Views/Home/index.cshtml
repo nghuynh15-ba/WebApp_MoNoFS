@@ -1,0 +1,240 @@
+﻿@{
+    ViewBag.Title = "Dashboard";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="d-flex justify-content-end mb-4">
+    <button class="btn btn-dark rounded-0 disabled">
+        <i class="fas fa-calendar-alt me-2"></i>
+        Report: @DateTime.Now.ToString("MMMM dd, yyyy - HH:mm", System.Globalization.CultureInfo.GetCultureInfo("en-US"))
+    </button>
+</div>
+
+<div class="row mb-4">
+
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="kpi-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <p class="kpi-title">Total Revenue</p>
+                    <h2 class="kpi-value">
+                        @String.Format(System.Globalization.CultureInfo.GetCultureInfo("en-US"), "{0:C0}", ViewBag.TotalRevenue)
+                    </h2>
+                </div>
+                <i class="fas fa-dollar-sign kpi-icon"></i>
+            </div>
+            <p class="kpi-footer text-success fw-bold">
+                <i class="fas fa-chart-line"></i> Actual Revenue
+            </p>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="kpi-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <p class="kpi-title">New Orders (Month)</p>
+                    <h2 class="kpi-value">@ViewBag.NewOrders</h2>
+                </div>
+                <i class="fas fa-shopping-bag kpi-icon"></i>
+            </div>
+            <p class="kpi-footer text-muted">
+                Orders in @DateTime.Now.ToString("MMMM", System.Globalization.CultureInfo.GetCultureInfo("en-US"))
+            </p>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="kpi-card">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <p class="kpi-title">Total Customers</p>
+                    <h2 class="kpi-value">@ViewBag.TotalCustomers</h2>
+                </div>
+                <i class="fas fa-users kpi-icon"></i>
+            </div>
+            <p class="kpi-footer text-muted">
+                Registered Members
+            </p>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-md-6 mb-4">
+        <div class="kpi-card border-warning-subtle">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <p class="kpi-title text-warning">Pending Orders</p>
+                    <h2 class="kpi-value text-warning">@ViewBag.PendingOrders</h2>
+                </div>
+                <i class="fas fa-clock kpi-icon text-warning"></i>
+            </div>
+            <p class="kpi-footer text-danger fw-bold">
+                Action Required
+            </p>
+        </div>
+    </div>
+
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="chart-card">
+            <h3 class="chart-title">Quick Links</h3>
+            <div class="row g-3">
+                <div class="col-md-3">
+                    <a href="@Url.Action("Create", "Product")" class="btn btn-outline-dark w-100 py-3 rounded-0">
+                        <i class="fas fa-plus fa-2x d-block mb-2"></i> Add Product
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="@Url.Action("Index", "Order")" class="btn btn-outline-dark w-100 py-3 rounded-0">
+                        <i class="fas fa-list-alt fa-2x d-block mb-2"></i> Manage Orders
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="@Url.Action("Create", "Category")" class="btn btn-outline-dark w-100 py-3 rounded-0">
+                        <i class="fas fa-folder-plus fa-2x d-block mb-2"></i> Add Category
+                    </a>
+                </div>
+                <div class="col-md-3">
+                    <a href="@Url.Action("Index", "Customer")" class="btn btn-outline-dark w-100 py-3 rounded-0">
+                        <i class="fas fa-users-cog fa-2x d-block mb-2"></i> Customers
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="chart-card">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h3 class="chart-title mb-0">Daily Revenue @DateTime.Now.ToString("MMMM", System.Globalization.CultureInfo.GetCultureInfo("en-US"))</h3>
+                <span class="badge bg-dark rounded-0">Live Data</span>
+            </div>
+
+            <div class="chart-container" style="position: relative; height: 350px; width: 100%;">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+    @section Scripts {
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+        <script>
+        $(document).ready(function () {
+            // Gọi Ajax lấy dữ liệu
+            $.ajax({
+                url: '@Url.Action("GetDailyRevenue", "Home")',
+                type: 'GET',
+                success: function (data) {
+                    renderChart(data.labels, data.values);
+                },
+                error: function (error) {
+                    console.log("Error loading chart data", error);
+                }
+            });
+        });
+
+        function renderChart(labels, data) {
+            const ctx = document.getElementById('revenueChart').getContext('2d');
+
+            // 1. Tạo Gradient màu đen mờ dần (Sang trọng hơn)
+            let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+            gradient.addColorStop(0, 'rgba(0, 0, 0, 0.2)');   // Rất nhạt ở trên (10%)
+            gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');     // Trong suốt ở dưới
+
+            // 2. Cấu hình Font chữ chung
+            Chart.defaults.font.family = "'Montserrat', sans-serif";
+            Chart.defaults.color = '#888';
+
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Revenue',
+                        data: data,
+                        borderColor: '#000',        // Đường kẻ màu đen tuyệt đối
+                        borderWidth: 2.5,           // Độ dày vừa phải
+                        backgroundColor: gradient,  // Màu nền gradient
+                        fill: true,                 // Tô màu dưới đường kẻ
+                        tension: 0.4,               // Độ cong (0.4 là rất mượt)
+
+                        // Cấu hình điểm nút (Point)
+                        pointRadius: 0,             // Ẩn điểm bình thường (cho gọn)
+                        pointHoverRadius: 6,        // Khi hover mới hiện to lên
+                        pointBackgroundColor: '#fff', // Điểm màu trắng
+                        pointBorderColor: '#000',     // Viền điểm màu đen
+                        pointBorderWidth: 2,
+                        pointHitRadius: 20,         // Tăng vùng nhận diện chuột để dễ hover
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+
+                    // Hiệu ứng Animation khi load
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeOutQuart'
+                    },
+
+                    plugins: {
+                        legend: { display: false }, // Ẩn chú thích
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.9)', // Tooltip đen đậm
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            padding: 12,
+                            cornerRadius: 0, // Tooltip vuông vức (theo style Mono)
+                            displayColors: false, // Ẩn ô màu trong tooltip
+                            callbacks: {
+                                title: function(context) {
+                                    return 'Day ' + context[0].label;
+                                },
+                                label: function(context) {
+                                    let value = context.parsed.y;
+                                    // Format tiền tệ: $ 1,200
+                                    return '$ ' + value.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false }, // Ẩn lưới dọc
+                            ticks: {
+                                font: { size: 11 }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            border: { display: false }, // Ẩn đường kẻ trục Y
+                            grid: {
+                                color: '#f0f0f0', // Lưới ngang rất mờ
+                                drawBorder: false,
+                            },
+                            ticks: {
+                                font: { size: 11 },
+                                callback: function(value) {
+                                    if(value >= 1000) return '$' + value/1000 + 'k'; // Rút gọn số lớn (1k, 2k)
+                                    return '$' + value;
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                }
+            });
+        }
+        </script>
+    }

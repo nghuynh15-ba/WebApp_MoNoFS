@@ -1,0 +1,109 @@
+﻿@model IEnumerable<WebApp_MoNoFS.Models.Customer>
+
+@{
+    ViewBag.Title = "Customer Management";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="page-title" style="font-family: 'Playfair Display', serif; font-weight: 700;">Customers List</h2>
+</div>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body bg-light">
+        @using (Html.BeginForm("Index", "Customer", FormMethod.Get, new { @class = "row g-2 align-items-center" }))
+        {
+            <div class="col-auto">
+                <label class="fw-bold me-2">Find Customer:</label>
+            </div>
+            <div class="col-auto">
+                <div class="input-group">
+                    <span class="input-group-text bg-white rounded-0 border-end-0">
+                        <i class="fas fa-search text-muted"></i>
+                    </span>
+
+                    <input type="text"
+                           name="searchString"
+                           value="@ViewBag.CurrentFilter"
+                           class="form-control rounded-0 border-start-0"
+                           placeholder="Enter Name, Phone or Email..."
+                           style="width: 300px;">
+
+                    <button type="submit" class="btn btn-dark rounded-0">
+                        Filter
+                    </button>
+
+                    @if (!string.IsNullOrEmpty(ViewBag.CurrentFilter))
+                    {
+                        <a href="@Url.Action("Index")" class="btn btn-outline-secondary rounded-0" title="Clear Filter">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark text-uppercase">
+                    <tr>
+                        <th class="ps-4">User Info</th>
+                        <th>Contact</th>
+                        <th class="text-center">Status</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center">
+                                    <img src="~/Content/images/customers/@(string.IsNullOrEmpty(item.Photo) ? "default-user.png" : item.Photo)"
+                                         class="rounded-circle border"
+                                         style="width: 45px; height: 45px; object-fit: cover;"
+                                         onerror="this.src='https://placehold.co/45x45?text=User'" />
+                                    <div class="ms-3">
+                                        <p class="fw-bold mb-0">@item.Fullname</p>
+                                        <small class="text-muted">@item.Username</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <p class="mb-0"><i class="fas fa-envelope me-2 text-muted"></i> @item.Email</p>
+                                <small class="text-muted"><i class="fas fa-phone me-2"></i> @item.Phone</small>
+                            </td>
+                            <td class="text-center">
+                                @if (item.Activated == true)
+                                {
+                                    <span class="badge bg-dark rounded-0">Active</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary rounded-0 text-decoration-line-through">Locked</span>
+                                }
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group">
+                                    <a href="@Url.Action("Details", new { id = item.UserId })" class="btn btn-sm btn-outline-dark rounded-0" title="History">
+                                        <i class="fas fa-history"></i>
+                                    </a>
+                                    <a href="@Url.Action("Edit", new { id = item.UserId })" class="btn btn-sm btn-outline-dark rounded-0" title="Edit">
+                                        <i class="fas fa-user-edit"></i>
+                                    </a>
+                                    <a href="@Url.Action("Delete", new { id = item.UserId })" class="btn btn-sm btn-outline-danger rounded-0" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

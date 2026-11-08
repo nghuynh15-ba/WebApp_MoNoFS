@@ -1,0 +1,247 @@
+﻿@if (TempData["OrderSuccess"] != null && (bool)TempData["OrderSuccess"] == true)
+{
+    <style>
+       
+        .modal-rounded {
+            border-radius: 20px;
+            overflow: hidden;
+            border: none;
+        }
+
+        .btn-close-custom {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            font-size: 24px;
+            color: #aaa;
+            background: none;
+            border: none;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+            .btn-close-custom:hover {
+                color: #000;
+            }
+
+        .success-icon {
+            font-size: 80px;
+            color: #198754;
+            margin-bottom: 20px;
+        }
+
+        .order-title {
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: #333;
+        }
+
+        .info-box {
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .highlight-red {
+            color: #dc3545;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .highlight-black {
+            color: #000;
+            font-weight: bold;
+            font-size: 18px;
+        }
+
+        .btn-custom-outline {
+            border: 2px solid #333;
+            color: #333;
+            font-weight: 600;
+            padding: 10px;
+            background: white;
+            transition: all 0.3s;
+        }
+
+            .btn-custom-outline:hover {
+                background: #f8f9fa;
+            }
+
+        .btn-custom-black {
+            background-color: #212529;
+            color: white;
+            font-weight: 600;
+            padding: 10px;
+            border: 2px solid #212529;
+        }
+
+            .btn-custom-black:hover {
+                background-color: #000;
+                color: white;
+            }
+
+        .extra-actions a, .extra-actions button {
+            font-size: 14px;
+        }
+    </style>
+
+    <div class="modal fade" id="orderSuccessModal" tabindex="-1" role="dialog" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content modal-rounded p-4 text-center">
+                <button type="button" class="btn-close-custom" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <div class="modal-body p-2">
+                    <div class="success-icon"><i class="fa fa-check-circle"></i></div>
+                    <h2 class="order-title">ORDER SUCCESSFUL!</h2>
+                    <p class="text-muted">Thank you for shopping at MoNoFS.</p>
+
+                    <div class="info-box">
+                        <h6 class="text-center font-weight-bold mb-3">SAVE THIS TO TRACK YOUR ORDER</h6>
+                        <div class="info-row"><span class="text-muted">Order ID:</span><span class="highlight-red">#@TempData["NewOrderId"]</span></div>
+                        <div class="info-row"><span class="text-muted">Phone:</span><span class="highlight-black">@TempData["NewOrderPhone"]</span></div>
+                        <div class="text-center mt-3"><small class="text-muted font-italic">(Use these details in the "Track Order" page)</small></div>
+                    </div>
+
+                    <div class="d-flex flex-column gap-3">
+                        @if (Session["UserId"] != null)
+                        {
+                            <a href="@Url.Action("MyOrders", "Order")" class="btn btn-custom-outline btn-block mb-2"><i class="fa fa-list-alt"></i> View Order History</a>
+                        }
+                        else
+                        {
+                            <a href="@Url.Action("GuestTracking", "Order")" class="btn btn-custom-outline btn-block mb-2"><i class="fa fa-search"></i> Track Order Now</a>
+                        }
+                        <a href="@Url.Action("Index", "Products")" class="btn btn-custom-black btn-block mb-3"><i class="fa fa-shopping-bag"></i> Continue Shopping</a>
+                    </div>
+
+                    <div class="row extra-actions mt-2 pt-3 border-top">
+                        <div class="col-6">
+                            <a href="@Url.Action("PrintInvoice", "Order", new { id = TempData["NewOrderId"] })" target="_blank" class="btn btn-link text-secondary text-decoration-none p-0"><i class="fa fa-print"></i> Print Invoice</a>
+                        </div>
+                        <div class="col-6 border-left">
+                            <button type="button" class="btn btn-link text-danger text-decoration-none p-0" onclick="switchToCancelModal()"><i class="fa fa-times-circle"></i> Cancel Order</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="cancelConfirmModal" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1060;">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title fw-bold"><i class="fas fa-exclamation-triangle me-2"></i> Request Cancellation</h5>
+                    <button type="button" class="close text-white" onclick="switchToSuccessModal()"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body text-center p-4">
+                    <p class="fs-5">Request cancel for Order <strong class="text-danger">#@TempData["NewOrderId"]</strong>?</p>
+                    <small class="text-muted">This action cannot be undone immediately.</small>
+                </div>
+                <div class="modal-footer justify-content-center border-0 pb-4">
+                    <button type="button" class="btn btn-light" onclick="switchToSuccessModal()">Keep Order</button>
+                    <button type="button" class="btn btn-danger fw-bold" onclick="submitCancelRequest()">Yes, Send Request</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="waitApprovalModal" tabindex="-1" role="dialog" aria-hidden="true" style="z-index: 1070;" data-backdrop="static" data-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-body text-center p-5">
+                    <div class="mb-4 text-warning" style="font-size: 60px;">
+                        <i class="fas fa-hourglass-half fa-spin"></i>
+                    </div>
+                    <h4 class="fw-bold mb-3">Request Sent!</h4>
+                    <p class="text-muted mb-4">
+                        Your cancellation request has been submitted successfully.<br />
+                        <span class="text-danger fw-bold">Please wait for Admin confirmation.</span>
+                    </p>
+
+                    <button type="button" class="btn btn-dark px-4" id="btnGoToTracking">
+                        Check Status Now <i class="fas fa-arrow-right ml-2"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Biến lưu link redirect (nhận từ server)
+        var targetRedirectUrl = "";
+
+        document.addEventListener("DOMContentLoaded", function(event) {
+            $('#orderSuccessModal').modal('show');
+        });
+
+        function switchToCancelModal() {
+            $('#orderSuccessModal').modal('hide');
+            setTimeout(function() { $('#cancelConfirmModal').modal('show'); }, 400);
+        }
+
+        function switchToSuccessModal() {
+            $('#cancelConfirmModal').modal('hide');
+            setTimeout(function() { $('#orderSuccessModal').modal('show'); }, 400);
+        }
+
+        // HÀM GỬI AJAX HỦY ĐƠN
+        function submitCancelRequest() {
+            var orderId = '@TempData["NewOrderId"]';
+
+            // Hiện loading trên nút bấm để chuyên nghiệp hơn
+            var btn = event.target;
+            var originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+            btn.disabled = true;
+
+            $.ajax({
+                url: '@Url.Action("CancelOrder", "Order")',
+                type: 'POST',
+                data: { id: orderId },
+                success: function (response) {
+                    if (response.success) {
+                        // 1. Tắt modal xác nhận đỏ
+                        $('#cancelConfirmModal').modal('hide');
+
+                        // 2. Lưu link redirect
+                        targetRedirectUrl = response.redirectUrl;
+
+                        // 3. Hiện modal "Vui lòng chờ"
+                        setTimeout(function() {
+                            $('#waitApprovalModal').modal('show');
+                        }, 400);
+                    } else {
+                        alert(response.message);
+                        btn.innerHTML = originalText;
+                        btn.disabled = false;
+                    }
+                },
+                error: function () {
+                    alert('Error connecting to server.');
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            });
+        }
+
+        // Xử lý nút chuyển trang ở Modal cuối cùng
+        document.getElementById('btnGoToTracking').addEventListener('click', function() {
+            if (targetRedirectUrl) {
+                window.location.href = targetRedirectUrl;
+            } else {
+                window.location.reload(); // Fallback
+            }
+        });
+    </script>
+}

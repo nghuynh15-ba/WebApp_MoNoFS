@@ -1,0 +1,317 @@
+﻿@{
+    ViewBag.Title = "Track Order";
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+    var orderResult = ViewBag.OrderResult as WebApp_MoNoFS.Models.Order;
+}
+
+<section class="py-5" style="background-color: #f5f5f5; min-height: 85vh;">
+    <div class="container">
+
+        <div class="row justify-content-center mb-5">
+            <div class="col-md-6">
+                <div class="card shadow border-0">
+                    <div class="card-header text-white text-center py-3" style="background-color: #000;">
+                        <h4 class="mb-0 fw-bold">TRACK YOUR ORDER</h4>
+                        <small>Enter your order details to track status</small>
+                    </div>
+                    <div class="card-body p-4">
+                        @using (Html.BeginForm("GuestTracking", "Order", FormMethod.Post))
+                        {
+                            @Html.AntiForgeryToken()
+                            @Html.ValidationSummary(true, "", new { @class = "alert alert-danger" })
+
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Order ID</label>
+                                <input type="number" name="searchOrderId" class="form-control" required placeholder="e.g. 1024" />
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label fw-bold">Phone Number</label>
+                                <input type="text" name="searchPhone" class="form-control" required placeholder="e.g. 0912..." />
+                            </div>
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn text-white fw-bold py-2" style="background-color: #000;">
+                                    <i class="fas fa-search me-2"></i> TRACK ORDER
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        @if (orderResult != null)
+        {
+            // LOGIC MÀU SẮC & TIẾN TRÌNH (COPY TỪ MYORDERS)
+            int progress = 0;
+            string statusColor = "bg-secondary";
+            string progressBarColor = "bg-success";
+
+            if (orderResult.Status == "Pending") { progress = 25; statusColor = "bg-primary"; }
+            else if (orderResult.Status == "Confirmed") { progress = 50; statusColor = "bg-info text-dark"; }
+            else if (orderResult.Status == "Shipping") { progress = 75; statusColor = "bg-warning text-dark"; }
+            else if (orderResult.Status == "Completed" || orderResult.Status == "Delivered") { progress = 100; statusColor = "bg-success"; }
+            else if (orderResult.Status == "Cancelled")
+            {
+                progress = 0;
+                statusColor = "bg-secondary";
+                progressBarColor = "bg-secondary";
+            }
+            else if (orderResult.Status == "RequestCancel")
+            {
+                progress = 50;
+                statusColor = "bg-warning text-dark";
+                progressBarColor = "bg-warning";
+            }
+
+            <div class="row justify-content-center">
+                <div class="col-md-10">
+                    <div class="card border-0 shadow-sm mb-4">
+
+                        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom">
+                            <div>
+                                <h5 class="mb-0 fw-bold text-dark"><i class="fas fa-receipt me-2"></i> Result for Order #@orderResult.OrderId</h5>
+                                <span class="text-muted small ms-4">Date: @(orderResult.OrderDate.HasValue ? orderResult.OrderDate.Value.ToString("dd/MM/yyyy HH:mm") : "")</span>
+                            </div>
+
+                            @if (orderResult.Status == "RequestCancel")
+                            {
+                                <span class="badge bg-warning text-dark"><i class="fas fa-clock me-1"></i> Waiting Approval</span>
+                            }
+                            else if (orderResult.Status == "Cancelled")
+                            {
+                                <span class="badge bg-secondary">CANCELLED</span>
+                            }
+                            else
+                            {
+                                <span class="badge @statusColor">@orderResult.Status</span>
+                            }
+                        </div>
+
+                        <div class="card-body p-4">
+
+                            @if (orderResult.Status != "Cancelled")
+                            {
+                                <div class="position-relative mb-5 mt-3 px-3">
+                                    <div class="progress" style="height: 3px;">
+                                        <div class="progress-bar @progressBarColor" role="progressbar" style="width:100%;"></div>
+                                    </div>
+                                    <div class="d-flex justify-content-between position-absolute top-0 w-100" style="margin-top: -14px; left: 0;">
+                                        <div class="text-center" style="width: 25%;">
+                                            <div class="rounded-circle bg-@(progress >= 25 ? "success" : "secondary") text-white d-flex align-items-center justify-content-center mx-auto" style="width: 30px; height: 30px;"><i class="fas fa-file-alt"></i></div>
+                                            <small class="d-block mt-2" style="font-size: 11px;">Ordered</small>
+                                        </div>
+                                        <div class="text-center" style="width: 25%;">
+                                            @if (orderResult.Status == "RequestCancel")
+                                            {
+                                                <div class="rounded-circle bg-warning text-dark d-flex align-items-center justify-content-center mx-auto" style="width: 30px; height: 30px;"><i class="fas fa-hourglass-half"></i></div>
+                                                <small class="d-block mt-2 fw-bold text-warning" style="font-size: 11px;">Cancelling...</small>
+                                            }
+                                            else
+                                            {
+                                                <div class="rounded-circle bg-@(progress >= 50 ? "success" : "secondary") text-white d-flex align-items-center justify-content-center mx-auto" style="width: 30px; height: 30px;"><i class="fas fa-wallet"></i></div>
+                                                <small class="d-block mt-2" style="font-size: 11px;">Confirmed</small>
+                                            }
+                                        </div>
+                                        <div class="text-center" style="width: 25%;">
+                                            <div class="rounded-circle bg-@(progress >= 75 ? "success" : "secondary") text-white d-flex align-items-center justify-content-center mx-auto" style="width: 30px; height: 30px;"><i class="fas fa-truck"></i></div>
+                                            <small class="d-block mt-2" style="font-size: 11px;">Shipping</small>
+                                        </div>
+                                        <div class="text-center" style="width: 25%;">
+                                            <div class="rounded-circle bg-@(progress >= 100 ? "success" : "secondary") text-white d-flex align-items-center justify-content-center mx-auto" style="width: 30px; height: 30px;"><i class="fas fa-box"></i></div>
+                                            <small class="d-block mt-2" style="font-size: 11px;">Delivered</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-light text-center mb-5 border-0 text-muted">
+                                    <i class="fas fa-ban me-2 fa-2x"></i><br />
+                                    <span class="fw-bold">THIS ORDER HAS BEEN CANCELLED</span>
+                                </div>
+                            }
+
+                            <hr />
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <h6 class="fw-bold text-uppercase mb-3"><i class="fas fa-map-marker-alt me-2 text-danger"></i> SHIPPING DETAILS</h6>
+                                    <p class="mb-1"><strong>Recipient:</strong> @orderResult.CustomerName</p>
+                                    <p class="mb-1"><strong>Phone:</strong> @orderResult.CustomerPhone</p>
+                                    <p class="text-muted">@orderResult.CustomerAddress</p>
+                                </div>
+                                <div class="col-md-6 text-md-end">
+                                    <h6 class="fw-bold text-uppercase mb-3">TOTAL AMOUNT</h6>
+                                    <p class="fw-bold text-danger display-6">@string.Format(System.Globalization.CultureInfo.GetCultureInfo("en-US"), "{0:C0}", orderResult.OrderDetails.Sum(d => d.Price * d.Quantity))</p>
+                                </div>
+                            </div>
+
+                            <h6 class="fw-bold text-uppercase mb-3 border-bottom pb-2">PRODUCT LIST</h6>
+                            <div class="bg-light rounded p-3 mb-4">
+                                @foreach (var detail in orderResult.OrderDetails)
+                                {
+                                    <div class="d-flex align-items-center border-bottom pb-3 mb-3 last-border-0">
+                                        <div class="me-3">
+                                            @if (detail.Product != null)
+                                            {
+                                                <img src="~/Images/@detail.Product.ProImage" class="rounded border bg-white" style="width: 70px; height: 70px; object-fit: cover;" />
+                                            }
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            @if (detail.Product != null)
+                                            {
+                                                <h6 class="mb-1 text-dark fw-bold">@detail.Product.ProName</h6>
+                                                <small class="text-muted d-block">
+                                                    Size: <span class="fw-bold text-dark">@detail.Size</span>
+                                                </small>
+                                                <small class="text-muted d-block">Code: #@detail.ProductId</small>
+                                                <small class="text-muted">Qty: @detail.Quantity</small>
+                                            }
+                                        </div>
+                                        <div class="text-end">
+                                            <span class="fw-bold text-danger">@string.Format(System.Globalization.CultureInfo.GetCultureInfo("en-US"), "{0:C0}", detail.Price * detail.Quantity)</span>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+
+                            <div class="d-flex justify-content-end">
+                                @if (orderResult.Status == "Pending" || orderResult.Status == "Confirmed")
+                                {
+                                    using (Html.BeginForm("CancelOrder", "Order", new { id = orderResult.OrderId }, FormMethod.Post, new { id = "cancelForm-" + orderResult.OrderId }))
+                                    {
+                                        @Html.AntiForgeryToken()
+                                        <button type="button" class="btn btn-danger btn-lg" onclick="showCancelModal(@orderResult.OrderId)">
+                                            <i class="fas fa-times me-2"></i> Request Cancellation
+                                        </button>
+                                    }
+                                }
+                                else if (orderResult.Status == "RequestCancel")
+                                {
+                                    <button type="button" class="btn btn-warning btn-lg text-dark" disabled style="opacity: 0.8; cursor: not-allowed;">
+                                        <i class="fas fa-spinner fa-spin me-2"></i> Waiting for Approval...
+                                    </button>
+                                }
+                                else if (orderResult.Status == "Cancelled")
+                                {
+                                    <a href="@Url.Action("Index", "Product")" class="btn btn-dark btn-lg">
+                                        <i class="fas fa-shopping-bag me-2"></i> Continue Shopping
+                                    </a>
+                                }
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</section>
+
+<div class="modal fade" id="cancelConfirmModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title fw-bold"><i class="fas fa-exclamation-triangle me-2"></i> Request Cancellation</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center p-4">
+                <p class="fs-5">Request cancel for Order <strong id="modalOrderIdText">#...</strong>?</p>
+                <small class="text-muted">This action cannot be undone immediately.</small>
+            </div>
+            <div class="modal-footer justify-content-center border-0 pb-4">
+                <button type="button" class="btn btn-light" data-bs-dismiss="modal">Keep Order</button>
+                <button type="button" class="btn btn-danger fw-bold" id="btnConfirmCancel">Yes, Send Request</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="waitApprovalModal" tabindex="-1" aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center p-5">
+                <div class="mb-4 text-warning" style="font-size: 60px;">
+                    <i class="fas fa-hourglass-half fa-spin"></i>
+                </div>
+                <h4 class="fw-bold mb-3">Request Sent!</h4>
+                <p class="text-muted mb-4">
+                    Your cancellation request has been submitted successfully.<br />
+                    <span class="text-danger fw-bold">Please wait for Admin confirmation.</span>
+                </p>
+
+                <button type="button" class="btn btn-dark px-4" id="btnReloadPage">
+                    Check Status Now <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="hiddenOrderId" />
+
+<script>
+    var targetRedirectUrl = "";
+
+    // Hàm hiện Modal xác nhận
+    function showCancelModal(orderId) {
+        document.getElementById('hiddenOrderId').value = orderId;
+        document.getElementById('modalOrderIdText').innerText = '#' + orderId;
+        var myModal = new bootstrap.Modal(document.getElementById('cancelConfirmModal'));
+        myModal.show();
+    }
+
+    // Xử lý khi ấn nút "Yes, Send Request"
+    document.getElementById('btnConfirmCancel').addEventListener('click', function () {
+        var orderId = document.getElementById('hiddenOrderId').value;
+        var btn = this;
+        var originalText = btn.innerHTML;
+
+        // 1. Hiệu ứng loading nút bấm
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i> Sending...';
+        btn.disabled = true;
+
+        // 2. Gửi AJAX
+        fetch('/Order/CancelOrder/' + orderId, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // 3. Nếu thành công:
+                    targetRedirectUrl = data.redirectUrl;
+
+                    // Ẩn Modal xác nhận đỏ
+                    var modalConfirm = bootstrap.Modal.getInstance(document.getElementById('cancelConfirmModal'));
+                    modalConfirm.hide();
+
+                    // Hiện Modal chờ (waitApprovalModal) sau 400ms
+                    setTimeout(function () {
+                        var modalWait = new bootstrap.Modal(document.getElementById('waitApprovalModal'));
+                        modalWait.show();
+                    }, 400);
+
+                } else {
+                    alert(data.message || "Error cancelling order");
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Connection error.");
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+    });
+
+    // Xử lý nút "Check Status Now" ở Modal chờ
+    document.getElementById('btnReloadPage').addEventListener('click', function () {
+        if (targetRedirectUrl) {
+            window.location.href = targetRedirectUrl;
+        } else {
+            window.location.reload();
+        }
+    });
+</script>

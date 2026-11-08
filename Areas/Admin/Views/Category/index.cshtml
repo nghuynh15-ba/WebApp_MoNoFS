@@ -1,0 +1,171 @@
+﻿@model IEnumerable<WebApp_MoNoFS.Models.Category>
+
+@{
+    ViewBag.Title = "Category Management";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="page-title" style="font-family: 'Playfair Display', serif; font-weight: 700;">Categories</h2>
+    <a href="@Url.Action("Create")" class="btn btn-mono">
+        <i class="fas fa-plus me-2"></i> New Category
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0 category-table">
+                <thead class="table-dark text-uppercase">
+                    <tr>
+                        <th class="ps-4" style="width: 40%;">Category Name</th>
+                        <th class="text-center">Level</th>
+                        <th class="text-center">Products Count</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+
+                    @*  1: LỌC DANH MỤC CHA (ParentId là null) *@
+                    @foreach (var parent in Model.Where(c => c.ParentId == null))
+                    {
+                        <tr class="table-light fw-bold">
+                            <td class="ps-4">
+                                <span class="text-uppercase">@parent.CatName</span>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-dark rounded-0">ROOT</span>
+                            </td>
+                            <td class="text-center text-muted">
+                                @(parent.Products != null ? parent.Products.Count : 0)
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group">
+                                    <a href="@Url.Action("Edit", new { id = parent.CatId })" class="btn btn-sm btn-icon" title="Edit">
+                                        <i class="fas fa-pen"></i>
+                                    </a>
+                                    <a href="@Url.Action("Delete", new { id = parent.CatId })" class="btn btn-sm btn-icon text-danger delete-btn" title="Delete">
+                                        <i class="fas fa-trash"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+
+                        @*  2: LỌC DANH MỤC CON CỦA CHA HIỆN TẠI *@
+                        var childItems = Model.Where(c => c.ParentId == parent.CatId).ToList();
+                        foreach (var child in childItems)
+                        {
+                            <tr>
+                                <td class="ps-4">
+                                    <div class="ms-4 border-start border-2 border-secondary ps-3">
+                                        <span class="text-muted me-2">↳</span> @child.CatName
+                                    </div>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge badge-mono-outline text-muted">Sub-Category</span>
+                                </td>
+                                <td class="text-center">
+                                    @(child.Products != null ? child.Products.Count : 0)
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="btn-group">
+                                        <a href="@Url.Action("Edit", new { id = child.CatId })" class="btn btn-sm btn-icon" title="Edit">
+                                            <i class="fas fa-pen"></i>
+                                        </a>
+                                        <a href="@Url.Action("Delete", new { id = child.CatId })" class="btn btn-sm btn-icon text-danger delete-btn" title="Delete">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+
+                    @*  3 : Hiển thị các danh mục mồ côi (có ParentId nhưng Parent không tồn tại hoặc sai sót) *@
+                    @if (Model.Any(c => c.ParentId != null && !Model.Any(p => p.CatId == c.ParentId)))
+                    {
+                        <tr class="table-warning">
+                            <td colspan="4" class="ps-4 fw-bold text-danger">Uncategorized / Orphaned Items</td>
+                        </tr>
+                        foreach (var orphan in Model.Where(c => c.ParentId != null && !Model.Any(p => p.CatId == c.ParentId)))
+                        {
+                            <tr>
+                                <td class="ps-4 text-danger">@orphan.CatName (Invalid Parent ID: @orphan.ParentId)</td>
+                                <td class="text-center"><span class="badge bg-danger">Error</span></td>
+                                <td class="text-center">-</td>
+                                <td class="text-end pe-4">
+                                    <a href="@Url.Action("Edit", new { id = orphan.CatId })" class="btn btn-sm btn-outline-dark">Fix</a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+    .page-title {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        color: #000;
+    }
+
+    .btn-mono {
+        background-color: #000;
+        color: #fff;
+        border: 1px solid #000;
+        border-radius: 0;
+        padding: 8px 20px;
+        transition: all 0.3s;
+    }
+
+        .btn-mono:hover {
+            background-color: #fff;
+            color: #000;
+        }
+
+    .category-table thead th {
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+        background-color: #000;
+        color: #fff;
+        border: none;
+        padding-top: 15px;
+        padding-bottom: 15px;
+    }
+
+    .badge-mono-outline {
+        color: #666;
+        border: 1px solid #ccc;
+        background-color: transparent;
+        border-radius: 0;
+        font-weight: 500;
+        font-size: 0.7rem;
+    }
+
+    .btn-icon {
+        border: 1px solid #e0e0e0;
+        margin-left: 5px;
+        color: #333;
+        border-radius: 0;
+        width: 32px;
+        height: 32px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+    }
+
+        .btn-icon:hover {
+            background-color: #000;
+            color: #fff;
+            border-color: #000;
+        }
+
+        .btn-icon.delete-btn:hover {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+</style>

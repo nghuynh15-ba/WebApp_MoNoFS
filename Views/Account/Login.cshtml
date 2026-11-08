@@ -1,0 +1,63 @@
+﻿@using WebApp_MoNoFS.Models 
+@model WebApp_MoNoFS.Models.Customer 
+
+@{
+    ViewBag.Title = "Login";
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+
+<div class="account-simple-wrapper">
+    <div class="account-simple-card">
+
+        <h2 class="form-title">Login</h2>
+        <p class="form-subtitle">Enter Login details to get access</p>
+        <hr />
+
+        @*POST dữ liệu Email và Password *@
+        @using (Html.BeginForm("Login", "Account", new { ReturnUrl = ViewBag.ReturnUrl }, FormMethod.Post, new { @class = "login-form", role = "form" }))
+        {
+            @Html.AntiForgeryToken()
+
+            if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success">
+                    @TempData["SuccessMessage"]
+                </div>
+            }
+
+            @Html.ValidationSummary(true, "", new { @class = "text-danger mb-3" })
+
+            
+            <div class="text-danger mb-3">
+                @ViewBag.Error
+            </div>
+
+            @* --- TRƯỜNG: EMAIL  --- *@
+            <div class="form-group mb-3">
+               
+                @Html.LabelFor(m => m.Email, "Email Address", new { @class = "form-label" })
+                @Html.TextBoxFor(m => m.Email, new { @class = "form-control", placeholder = "Enter Email Address", type = "email" })
+                @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger" })
+            </div>
+
+            @* --- TRƯỜNG: PASSWORD --- *@
+            <div class="form-group mb-3">
+                @Html.LabelFor(m => m.Password, "Password", new { @class = "form-label" })
+                @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Enter Password" })
+                @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger" })
+            </div>
+
+            <div class="d-flex justify-content-end align-items-center mb-3">
+                <a href="@Url.Action("ForgotPassword", "Account")" class="forgot-link">Forgot Password?</a> 
+            </div>
+
+            <div class="form-group">
+                <input type="submit" value="Login" class="btn btn-warning w-100" />
+            </div>
+
+            <p class="text-center mt-4 signup-prompt">
+                Don't have an account? @Html.ActionLink("Register", "Register", null, new { @class = "signup-link" })
+            </p>
+        }
+    </div>
+</div>

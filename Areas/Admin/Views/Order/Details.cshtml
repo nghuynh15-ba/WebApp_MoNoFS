@@ -1,0 +1,85 @@
+﻿@model WebApp_MoNoFS.Models.Order
+
+@{
+    ViewBag.Title = "Order Details";
+    Layout = "~/Areas/Admin/Views/Shared/_LayoutAdmin.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="page-title" style="font-family: 'Playfair Display', serif; font-weight: 700;">Order Details: #@Model.OrderId</h2>
+        <a href="@Url.Action("Index")" class="btn btn-outline-dark rounded-0">
+            <i class="fas fa-arrow-left me-2"></i> Back to List
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-dark text-white rounded-0">
+                    <h5 class="mb-0"><i class="fas fa-user me-2"></i> Customer Info</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>Name:</strong> @Model.CustomerName</p>
+                    <p><strong>Phone:</strong> @Model.CustomerPhone</p>
+                    <p><strong>Email:</strong> @Model.CustomerEmail</p>
+                    <p><strong>Address:</strong> @Model.CustomerAddress</p>
+                    <hr />
+                    <p><strong>Order Date:</strong> @(Model.OrderDate.HasValue ? Model.OrderDate.Value.ToString("dd/MM/yyyy HH:mm") : "")</p>
+                    <p><strong>Payment:</strong> @Model.PaymentType</p>
+                    <p><strong>Status:</strong> <span class="badge bg-dark rounded-0">@Model.Status</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-8 mb-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white border-bottom rounded-0">
+                    <h5 class="mb-0 text-dark">Order Items</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-4">Product</th>
+                                    <th class="text-end">Price</th>
+                                    <th class="text-center">Qty</th>
+                                    <th class="text-end pe-4">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @{ decimal grandTotal = 0; }
+                                @foreach (var item in Model.OrderDetails)
+                                {
+                                    var subtotal = (item.Price ?? 0) * (item.Quantity ?? 0);
+                                    grandTotal += subtotal;
+                                    <tr>
+                                        <td class="ps-4">
+                                            <div class="d-flex align-items-center">
+                                                <img src="~/Images/@item.Product.ProImage"
+                                                     alt="" style="width: 40px; height: 40px; object-fit: cover; border: 1px solid #eee;" class="me-2">
+                                                <span>@item.Product.ProName</span>
+                                            </div>
+                                        </td>
+                                        <td class="text-end">@String.Format(System.Globalization.CultureInfo.GetCultureInfo("en-US"), "{0:C0}", item.Price)</td>
+                                        <td class="text-center">@item.Quantity</td>
+                                        <td class="text-end pe-4 fw-bold">@String.Format(System.Globalization.CultureInfo.GetCultureInfo("en-US"), "{0:C0}", subtotal)</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot class="table-light">
+                                <tr>
+                                    <td colspan="3" class="text-end fw-bold pt-3">GRAND TOTAL:</td>
+                                    <td class="text-end pe-4 fw-bold fs-5 pt-3">
+                                        @String.Format(System.Globalization.CultureInfo.GetCultureInfo("en-US"), "{0:C0}", grandTotal)
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

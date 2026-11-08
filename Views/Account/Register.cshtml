@@ -1,0 +1,208 @@
+﻿@using WebApp_MoNoFS.Models
+@model WebApp_MoNoFS.Models.Customer
+
+@{
+    ViewBag.Title = "Register";
+    Layout = "~/Views/Shared/_AccountLayout.cshtml";
+}
+
+<div class="account-simple-wrapper">
+    <div class="account-simple-card" style="max-width: 800px;">
+
+
+        <h2 class="form-title text-center">REGISTER</h2>
+        <p class="form-subtitle text-center mb-4">Create your account to get full access</p>
+
+        @using (Html.BeginForm("Register", "Account", FormMethod.Post, new { @class = "register-form", role = "form", id = "registerForm" }))
+        {
+            @Html.AntiForgeryToken()
+            @Html.ValidationSummary(true, "", new { @class = "alert alert-danger mb-3 small" })
+
+            <div class="row g-3">
+                @* --- HÀNG 1: THÔNG TIN CÁ NHÂN (Họ tên & SĐT) --- *@
+                <div class="col-md-6">
+                    <div class="form-group mb-0">
+                        @Html.LabelFor(m => m.Fullname, "Full Name", new { @class = "form-label fw-bold small text-muted" })
+                        @Html.TextBoxFor(m => m.Fullname, new { @class = "form-control", placeholder = "Your full name" })
+                        @Html.ValidationMessageFor(m => m.Fullname, "", new { @class = "text-danger small" })
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-0">
+                        @Html.LabelFor(m => m.Phone, "Phone Number", new { @class = "form-label fw-bold small text-muted" })
+                        @Html.TextBoxFor(m => m.Phone, new { @class = "form-control", placeholder = "Your phone number" })
+                        @Html.ValidationMessageFor(m => m.Phone, "", new { @class = "text-danger small" })
+                    </div>
+                </div>
+
+                @* --- HÀNG 2: THÔNG TIN ĐĂNG NHẬP (Username & Email) --- *@
+                <div class="col-md-6">
+                    <div class="form-group mb-0">
+                        @Html.LabelFor(m => m.Username, "Username", new { @class = "form-label fw-bold small text-muted" })
+                        @Html.TextBoxFor(m => m.Username, new { @class = "form-control", placeholder = "Desired username" })
+                        @Html.ValidationMessageFor(m => m.Username, "", new { @class = "text-danger small" })
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group mb-0">
+                        @Html.LabelFor(m => m.Email, "Email Address", new { @class = "form-label fw-bold small text-muted" })
+                        @Html.TextBoxFor(m => m.Email, new { @class = "form-control", type = "email", placeholder = "name@example.com" })
+                        @Html.ValidationMessageFor(m => m.Email, "", new { @class = "text-danger small" })
+                    </div>
+                </div>
+
+                @* --- HÀNG 3: MẬT KHẨU (Full dòng) --- *@
+                <div class="col-12">
+                    <div class="form-group mb-0">
+                        @Html.LabelFor(m => m.Password, "Password", new { @class = "form-label fw-bold small text-muted" })
+                        @Html.PasswordFor(m => m.Password, new { @class = "form-control", placeholder = "Create a password" })
+                        @Html.ValidationMessageFor(m => m.Password, "", new { @class = "text-danger small" })
+                    </div>
+                </div>
+
+                @* --- HÀNG 4: ĐỊA CHỈ GIAO HÀNG (Bộ chọn thông minh) --- *@
+                <div class="col-12 mt-4">
+                    <h6 class="fw-bold mb-2 text-uppercase" style="font-size: 0.8rem; letter-spacing: 1px;">Shipping Address</h6>
+                    <div class="p-3 bg-light rounded border">
+                        <div class="row g-2 mb-3">
+                            <div class="col-md-4">
+                                <label class="small text-muted mb-1">Province/City</label>
+                                <select class="form-select form-select-sm" id="province" required>
+                                    <option value="">Select Province</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="small text-muted mb-1">District</label>
+                                <select class="form-select form-select-sm" id="district" required disabled>
+                                    <option value="">Select District</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="small text-muted mb-1">Ward</label>
+                                <select class="form-select form-select-sm" id="ward" required disabled>
+                                    <option value="">Select Ward</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="small text-muted mb-1">Street / House No.</label>
+                            <input type="text" class="form-control" id="streetInput" placeholder="Ex: 123 Nguyen Hue Street..." required>
+                        </div>
+                    </div>
+
+                    @Html.HiddenFor(m => m.Address, new { id = "fullAddress" })
+                    @Html.ValidationMessageFor(m => m.Address, "", new { @class = "text-danger small" })
+                </div>
+
+                @* --- NÚT SUBMIT --- *@
+                <div class="col-12 mt-4">
+                    <button type="submit" class="btn btn-warning w-100 py-2 fw-bold text-uppercase shadow-sm">
+                        Create Account
+                    </button>
+                </div>
+            </div>
+
+            <p class="text-center mt-4 signup-prompt small text-muted">
+                Already have an account? @Html.ActionLink("Login here", "Login", null, new { @class = "text-decoration-none fw-bold", style = "color: #c8a165;" })
+            </p>
+        }
+    </div>
+</div>
+
+
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // API lấy địa chỉ của ESGOO
+        const apiBase = "https://esgoo.net/api-tinhthanh";
+
+        // --- 1. Load Tỉnh/Thành khi trang vừa chạy ---
+        $.getJSON(apiBase + "/1/0.htm", function (data) {
+            if (data.error === 0) {
+                renderOptions(data.data, "province");
+            }
+        });
+
+        // --- 2. Sự kiện chọn Tỉnh -> Load Quận/Huyện ---
+        $("#province").change(function () {
+            // Reset Quận và Phường về mặc định khi đổi Tỉnh
+            $("#district").html('<option value="">Select District</option>').prop("disabled", true);
+            $("#ward").html('<option value="">Select Ward</option>').prop("disabled", true);
+
+            var provinceId = $(this).find(':selected').data('id');
+            if (provinceId) {
+                $.getJSON(apiBase + "/2/" + provinceId + ".htm", function (data) {
+                    if (data.error === 0) {
+                        renderOptions(data.data, "district");
+                        $("#district").prop("disabled", false);
+                    }
+                });
+            }
+        });
+
+        // --- 3. Sự kiện chọn Quận/Huyện -> Load Phường/Xã ---
+        $("#district").change(function () {
+            // Reset Phường về mặc định khi đổi Quận
+            $("#ward").html('<option value="">Select Ward</option>').prop("disabled", true);
+
+            var districtId = $(this).find(':selected').data('id');
+            if (districtId) {
+                $.getJSON(apiBase + "/3/" + districtId + ".htm", function (data) {
+                    if (data.error === 0) {
+                        renderOptions(data.data, "ward");
+                        $("#ward").prop("disabled", false);
+                    }
+                });
+            }
+        });
+
+        // --- 4. Hàm render Option dùng chung ---
+        function renderOptions(array, selectId) {
+            let row = '<option value="">Select</option>';
+            array.forEach(function (element) {
+                // Lưu ID vào data-id để gọi API cấp con
+                // Lưu Full Name vào value để submit về server
+                row += `<option data-id="${element.id}" value="${element.full_name}">${element.full_name}</option>`;
+            });
+            $("#" + selectId).html(row);
+        }
+
+        // --- 5. XỬ LÝ SUBMIT FORM (QUAN TRỌNG NHẤT) ---
+        // Sửa từ #checkoutForm thành #registerForm cho đúng ID của Form
+        $("#registerForm").submit(function (e) {
+
+            // Lấy giá trị các ô
+            let street = $("#streetInput").val();
+            let ward = $("#ward").val();
+            let district = $("#district").val();
+            let province = $("#province").val();
+
+            // Kiểm tra xem đã chọn đủ chưa (Validation)
+            // Nếu một trong các ô bị rỗng -> Báo lỗi
+            if (!street || street.trim() === "") {
+                alert("Please enter Street address.");
+                e.preventDefault(); return false;
+            }
+            if (!province || province === "") {
+                alert("Please select Province/City.");
+                e.preventDefault(); return false;
+            }
+            if (!district || district === "") {
+                alert("Please select District.");
+                e.preventDefault(); return false;
+            }
+            if (!ward || ward === "") {
+                alert("Please select Ward.");
+                e.preventDefault(); return false;
+            }
+
+            // Nếu đủ -> Gộp chuỗi -> Gán vào input hidden
+            let fullAddress = `${street}, ${ward}, ${district}, ${province}`;
+            $("#fullAddress").val(fullAddress);
+
+            // Cho phép form submit
+            return true;
+        });
+    });
+</script>

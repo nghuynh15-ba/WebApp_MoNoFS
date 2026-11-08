@@ -1,0 +1,391 @@
+﻿@using WebApp_MoNoFS.Models
+@model IEnumerable<WebApp_MoNoFS.Models.Product>
+
+@{
+    ViewBag.Title = "HOME";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+
+
+    var womenList = ViewBag.womenList as List<WebApp_MoNoFS.Models.Product>;
+    var menList = ViewBag.menList as List<WebApp_MoNoFS.Models.Product>;
+    var accesoriesList = ViewBag.accesoriesList as List<WebApp_MoNoFS.Models.Product>;
+
+}
+
+
+
+@* === PHẦN 1: HERO CAROUSEL=== *@
+<div class="hero-wrapper">
+    <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
+
+        <div class="carousel-inner">
+            <div class="carousel-item active" id="slide1">
+                <div class="container hero-content">
+                    <div class="row">
+                        <div class="col-lg-8 col-md-10 mx-auto text-center">
+                            <h1 class="display-4 fw-bold">MONO FASHION WELCOME</h1>
+                            <p class="lead">Discover your style with our latest collection.</p>
+                            <a href="@Url.Action("Index", "Product")" class="btn btn-warning btn-lg me-2">Shop Now</a>
+                            <a href="@Url.Action("Index", "Product")" class="btn btn-outline-light btn-lg">View Products</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-item" id="slide2">
+                <div class="container hero-content">
+                    <div class="row">
+                        <div class="col-lg-8 col-md-10 mx-auto text-center">
+                            <h1 class="display-4 fw-bold">WINTER SALE UP TO 50%</h1>
+                            <p class="lead">Don't miss the biggest sale of this winter.</p>
+                            <a href="@Url.Action("Index", "Product", new { q = "sale" })" class="btn btn-warning btn-lg me-2">Shop Sale</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="carousel-item" id="slide3">
+                <div class="container hero-content">
+                    <div class="row">
+                        <div class="col-lg-8 col-md-10 mx-auto text-center">
+                            <h1 class="display-4 fw-bold">NEW ARRIVALS</h1>
+                            <p class="lead">Just landed products are waiting for you.</p>
+                            <a href="@Url.Action("Index", "Product", new { sort = "newest" })" class="btn btn-outline-light btn-lg">View Now</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@* === PHẦN 2: FEATURED PRODUCTS  === *@
+
+<section class="featured-products">
+    <div class="container">
+
+        <div class="row">
+            <div class="col-12 text-center mb-4">
+                <span class="section-kicker">Discover</span>
+                <h2 class="section-title">FEATURED PRODUCTS</h2>
+                <p class="section-subtitle">Discover the curated collection for this season.</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12 d-flex justify-content-center">
+                <ul class="nav nav-tabs product-nav-tabs mb-4" id="productTab" role="tablist">
+
+                    <li class="nav-item" role="presentation">
+
+                        <button class="nav-link active" id="women-tab" data-bs-toggle="tab"
+                                data-bs-target="#women-panel" type="button" role="tab">
+
+                            Women
+
+                        </button>
+
+                    </li>
+
+                    <li class="nav-item" role="presentation">
+
+                        <button class="nav-link" id="men-tab" data-bs-toggle="tab" data-bs-target="#men-panel"
+                                type="button" role="tab">
+
+                            Men
+
+                        </button>
+
+                    </li>
+                    <li class="nav-item" role="presentation">
+
+                        <button class="nav-link" id="accessories-tab" data-bs-toggle="tab"
+                                data-bs-target="#accessories-panel" type="button" role="tab">
+
+                            Accessories
+
+                        </button>
+
+                    </li>
+
+                </ul>
+
+            </div>
+
+        </div>
+    </div>
+
+
+
+    <div class="tab-content" id="productTabContent">
+        <div class="tab-pane fade show active" id="women-panel" role="tabpanel">
+            <div class="row">
+                @if (womenList != null && womenList.Any())
+                {
+                    foreach (var product in womenList)
+                    {
+                        @Html.Partial("_ProductCard", product)
+                    }
+                }
+            </div>
+            <div class="row mt-4 pt-3">
+                <div class="col-12 text-center">
+                    <a href="@Url.Action("Index", "Product", new { categoryId = 1 })" class="btn-mono-outline">View All Women's</a>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="men-panel" role="tabpanel">
+            <div class="row">
+                @if (menList != null && menList.Any())
+                {
+                    foreach (var product in menList)
+                    {
+                        @Html.Partial("_ProductCard", product)
+                    }
+                }
+            </div>
+            <div class="row mt-4 pt-3">
+                <div class="col-12 text-center">
+                    <a href="@Url.Action("Index", "Product", new { categoryId = 2 })" class="btn-mono-outline">View All Men's</a>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="accessories-panel" role="tabpanel">
+            <div class="row">
+                @if (accesoriesList != null && accesoriesList.Any())
+                {
+                    foreach (var product in accesoriesList)
+                    {
+                        @Html.Partial("_ProductCard", product)
+                    }
+                }
+            </div>
+            <div class="row mt-4 pt-3">
+                <div class="col-12 text-center">
+                    <a href="@Url.Action("Index", "Product", new { categoryId = 3 })" class="btn-mono-outline">View All Accessories</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+</section>
+
+
+@* === PHẦN 3: VIDEO === *@
+<section class="featured-video-section" style="padding: 0; margin: 0; line-height: 0;">
+    <video style="width: 100%; height: 100%; object-fit:cover; display: block;"  
+           autoplay
+           muted
+           loop
+           playsinline
+           preload="auto">
+        <source src="@Url.Content("~/Images/1114.mp4")" type="video/mp4">
+
+    </video>
+</section>
+
+
+@* === PHẦN 4: COLLECTION === *@
+<section class="collections-section">
+    <div class="container">
+        <div class="row text-center mb-5">
+            <div class="col-12">
+                <span class="section-kicker">Explore</span>
+                <h2 class="collection-title">SEASONAL COLLECTIONS</h2>
+            </div>
+        </div>
+        <div class="row">
+
+            <div class="col-lg-4 col-md-4 mb-4">
+                <div class="collection-card-wrapper">
+                    <div id="spring-carousel" class="carousel slide" data-bs-ride="carousel"
+                         data-bs-interval="3000">
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <img src="https://plus.unsplash.com/premium_photo-1705369161563-6980bb750d71?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8U1BSSU5HJTIwQ0xPVEhFU3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600"
+                                     class="d-block w-100 collection-img" alt="Spring Look 1">
+                            </div>
+                            <div class="carousel-item">
+                                <img src="https://images.unsplash.com/photo-1594633313593-bab3825d0caf?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzV8fFNQUklORyUyMENMT1RIRVN8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600"
+                                     class="d-block w-100 collection-img" alt="Spring Look 2">
+                            </div>
+                        </div>
+
+                        <a href="@Url.Action("Index", "Product", new { season = "spring" })" class="collection-link-overlay">
+                            <div class="collection-card-overlay">
+                                <h4>SPRING ESSENTIALS</h4>
+                                <p>Lightweight layers and vibrant tones.</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-4 mb-4">
+                <div class="collection-card-wrapper">
+                    <div id="summer-carousel" class="carousel slide" data-bs-ride="carousel"
+                         data-bs-interval="3000">
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <img src="https://images.unsplash.com/photo-1624281043172-16ff234c2a14?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8U1VNTUVyJTIwQ0xPVEhFU3xlbnwwfHwwfHx8MA%3D%3D&auto=format&fit=crop&q=60&w=600"
+                                     class="d-block w-100 collection-img" alt="Summer Look 1">
+                            </div>
+                            <div class="carousel-item">
+                                <img src="https://plus.unsplash.com/premium_photo-1720465925241-0958cfb50183?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mjd8fFNVTU1FciUyMENMT1RIRVN8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600"
+                                     class="d-block w-100 collection-img" alt="Summer Look 2">
+                            </div>
+                        </div>
+
+                        <a href="@Url.Action("Index", "Product", new { season = "summer" })" class="collection-link-overlay">
+                            <div class="collection-card-overlay">
+                                <h4>SUMMER LINEN</h4>
+                                <p>Breathable fabrics and effortless chic.</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4 col-md-4 mb-4">
+                <div class="collection-card-wrapper">
+                    <div id="fall-carousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="3000">
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <img src="https://images.unsplash.com/photo-1603805785279-da750208c094?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8OHx8RkFMTCUyMENMT1RIRVN8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600"
+                                     class="d-block w-100 collection-img" alt="Fall Look 1">
+                            </div>
+                            <div class="carousel-item">
+                                <img src="https://images.unsplash.com/photo-1665398288056-8da669cc7909?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8RkFMTCUyMENMT1RIRVN8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&q=60&w=600"
+                                     class="d-block w-100 collection-img" alt="Fall Look 2">
+                            </div>
+                        </div>
+
+                        <a href="@Url.Action("Index", "Product", new { season = "fall" })" class="collection-link-overlay">
+                            <div class="collection-card-overlay">
+                                <h4>FALL KNITWEAR</h4>
+                                <p>Cozy textures and tailored silhouettes.</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+@* === PHẦN 5: STYLING APPOINTMENT  === *@
+<section class="styling-appointment-section">
+    <div class="overlay"></div>
+
+    <div class="container position-relative" style="z-index: 2;">
+        <div class="row align-items-center">
+
+            <div class="col-lg-5 mb-5 mb-lg-0 text-white">
+                <span class="text-uppercase tracking-widest mb-2 d-block" style="letter-spacing: 3px; font-size: 0.9rem; opacity: 0.8;">Personal Service</span>
+                <h2 class="display-5 fw-bold mb-3" style="font-family: 'Playfair Display', serif;">BOOK YOUR <br>STYLING SESSION</h2>
+                <p class="lead mb-4" style="opacity: 0.9; font-weight: 300;">
+                    Experience a complimentary consultation with our expert stylists. Redefine your look today.
+                </p>
+                <ul class="list-unstyled" style="opacity: 0.8; font-size: 0.9rem;">
+
+                    <li class="mb-2"><i class="fas fa-check-circle me-2"></i> 1-on-1 Consultation</li>
+                    <li class="mb-2"><i class="fas fa-check-circle me-2"></i> Curated Outfits</li>
+                </ul>
+            </div>
+
+            <div class="col-lg-6 offset-lg-1">
+
+                <form class="appointment-form-elegant p-4 p-md-5" action="@Url.Action("Book", "Styling")" method="post">
+                    @Html.AntiForgeryToken()
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="form-group">
+                                <label for="name">Your Name</label>
+
+                                <input type="text" id="name" name="Name" class="form-control-custom" placeholder="e.g. John Doe" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+
+                                <input type="email" id="email" name="Email" class="form-control-custom" placeholder="name@example.com" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="form-group">
+                                <label for="styleFocus">Style Focus</label>
+
+                                <select id="styleFocus" name="StyleFocus" class="form-control-custom" required>
+                                    <option value="" disabled selected>Select a focus</option>
+                                    <option value="Outerwear">Outerwear</option>
+                                    <option value="Dresses">Dresses</option>
+                                    <option value="Basics">Essentials</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="form-group">
+                                <label for="booking-date">Preferred Date</label>
+
+                                <input type="text" id="booking-date" name="PreferredDate" class="form-control-custom" placeholder="Select a date..." required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="form-group">
+                                <label for="requests">Special Requests</label>
+
+                                <textarea id="requests" name="SpecialRequests" class="form-control-custom" rows="2" placeholder="Tell us more about your style needs..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="text-center mt-5">
+                        <button type="submit" class="btn-booking-submit">
+                            CONFIRM BOOKING
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+@section scripts {
+    @* Script khởi tạo Flatpickr cho ô chọn ngày/giờ *@
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Khởi tạo Flatpickr
+            flatpickr("#booking-date", {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i",
+                minDate: "today",
+                altInput: true,
+                altFormat: "F j, Y h:i K"
+            });
+        });
+
+        // Script giả định cho Add to Cart
+        document.querySelectorAll('.btn-add-to-cart-ajax').forEach(button => {
+            button.addEventListener('click', function (e) {
+                e.preventDefault();
+                const productId = this.getAttribute('data-product-id');
+                console.log('Adding product ' + productId + ' to cart...');
+                // TODO: Thực hiện AJAX POST đến CartController/AddToCart
+                alert('Product ' + productId + ' added to cart (placeholder)');
+            });
+        });
+    </script>
+}
+
+
+4
+

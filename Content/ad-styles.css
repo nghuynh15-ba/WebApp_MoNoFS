@@ -1,0 +1,333 @@
+﻿:root {
+    --admin-bg: #f4f6f9; /* Màu nền tổng thể sáng nhẹ */
+    --sidebar-bg: #000000; /* Sidebar màu ĐEN */
+    --sidebar-text: #ffffff; /* Chữ màu TRẮNG */
+    --active-item: #ffffff; /* Nền mục đang chọn màu TRẮNG */
+    --active-text: #000000; /* Chữ mục đang chọn màu ĐEN */
+    --accent-color: #333333; /* Màu nhấn xám đậm */
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: var(--admin-bg);
+    color: #333;
+}
+
+/* Sidebar Styling */
+.admin-sidebar {
+    width: 250px;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: var(--sidebar-bg);
+    color: var(--sidebar-text);
+    padding: 20px 0;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    z-index: 1000;
+}
+
+.sidebar-logo {
+    text-align: center;
+    padding: 0 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    margin-bottom: 20px;
+}
+
+    .sidebar-logo img {
+        max-height: 40px;
+        /* Nếu logo màu không hợp, dùng filter để chuyển sang trắng */
+        /* filter: brightness(0) invert(1); */
+    }
+
+    .sidebar-logo span {
+        display: block;
+        font-family: 'Playfair Display', serif;
+        font-size: 1.2rem;
+        font-weight: 700;
+        margin-top: 10px;
+        letter-spacing: 1px;
+    }
+
+.admin-nav .nav-link {
+    color: rgba(255,255,255,0.7);
+    padding: 12px 25px;
+    font-weight: 500;
+    transition: all 0.3s;
+    border-left: 4px solid transparent;
+}
+
+    .admin-nav .nav-link:hover {
+        color: #fff;
+        background-color: rgba(255,255,255,0.1);
+    }
+
+    .admin-nav .nav-link.active {
+        background-color: var(--active-item);
+        color: var(--active-text);
+        border-left-color: var(--accent-color); /* Điểm nhấn bên trái */
+    }
+
+    .admin-nav .nav-link i {
+        width: 25px;
+        text-align: center;
+        margin-right: 10px;
+    }
+
+/* Main Content Styling */
+.admin-main-content {
+    margin-left: 250px;
+    padding: 30px;
+    min-height: 100vh;
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+    .content-header h1 {
+        font-family: 'Playfair Display', serif;
+        font-weight: 700;
+        margin: 0;
+        color: #000;
+    }
+
+/* Button Styling theo style Trắng/Đen */
+.btn-admin-secondary {
+    background-color: #fff;
+    border: 1px solid #000;
+    color: #000;
+    transition: all 0.3s;
+}
+
+    .btn-admin-secondary:hover {
+        background-color: #000;
+        color: #fff;
+    }
+
+
+/* --- DASHBOARD STYLE  --- */
+
+.kpi-card {
+    background-color: #fff;
+    padding: 25px;
+    border: 1px solid #eee; /* Viền mỏng nhẹ */
+    border-radius: 0; /* Vuông vức sang trọng */
+    box-shadow: 0 4px 6px rgba(0,0,0,0.02); /* Bóng rất nhẹ */
+    transition: all 0.3s ease;
+    height: 100%;
+}
+
+    .kpi-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+        border-color: #000; /* Hover thì viền đen đậm */
+    }
+
+.kpi-title {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #666;
+    margin-bottom: 5px;
+    font-weight: 600;
+}
+
+.kpi-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 0;
+}
+
+.kpi-icon {
+    font-size: 2rem;
+    color: #000; /* Icon màu đen */
+    opacity: 0.1; /* Làm mờ icon để không rối mắt */
+}
+
+.kpi-footer {
+    margin-top: 15px;
+    font-size: 0.85rem;
+    margin-bottom: 0;
+}
+
+/* Chart Card */
+.chart-card {
+    background-color: #fff;
+    padding: 30px;
+    border: 1px solid #eee;
+    border-radius: 0;
+}
+
+.chart-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #000;
+    margin-bottom: 20px;
+}
+
+/* Chỉnh màu text utility của Bootstrap sang style đen */
+.text-success {
+    color: #000 !important;
+    font-weight: 600;
+}
+/* Thay màu xanh bằng đen đậm */
+.text-danger {
+    color: #666 !important;
+    text-decoration: line-through;
+}
+
+
+
+/* --- PRODUCT MANAGEMENT STYLE --- */
+.page-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    color: #000;
+}
+
+.btn-mono {
+    background-color: #000;
+    color: #fff;
+    border: 1px solid #000;
+    border-radius: 0;
+    padding: 8px 20px;
+    transition: all 0.3s;
+}
+
+    .btn-mono:hover {
+        background-color: #fff;
+        color: #000;
+    }
+
+.product-table thead th {
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.product-img-wrapper {
+    width: 50px;
+    height: 50px;
+    border: 1px solid #eee;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+}
+
+.product-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+}
+
+.badge-mono-outline {
+    color: #000;
+    border: 1px solid #000;
+    background-color: transparent;
+    border-radius: 0;
+    font-weight: 500;
+    padding: 5px 10px;
+}
+
+.btn-icon {
+    border: 1px solid #e0e0e0;
+    margin-left: 5px;
+    color: #333;
+    border-radius: 0;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+}
+
+    .btn-icon:hover {
+        background-color: #000;
+        color: #fff;
+        border-color: #000;
+    }
+
+    .btn-icon.delete-btn:hover {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+
+
+
+.page-title {
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    color: #000;
+}
+
+.btn-mono {
+    background-color: #000;
+    color: #fff;
+    border: 1px solid #000;
+    border-radius: 0;
+    padding: 8px 20px;
+    transition: all 0.3s;
+}
+
+    .btn-mono:hover {
+        background-color: #fff;
+        color: #000;
+    }
+
+.category-table thead th {
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    background-color: #000;
+    color: #fff;
+    border: none;
+    padding-top: 15px;
+    padding-bottom: 15px;
+}
+
+.badge-mono-outline {
+    color: #666;
+    border: 1px solid #ccc;
+    background-color: transparent;
+    border-radius: 0;
+    font-weight: 500;
+    font-size: 0.7rem;
+}
+
+.btn-icon {
+    border: 1px solid #e0e0e0;
+    margin-left: 5px;
+    color: #333;
+    border-radius: 0;
+    width: 32px;
+    height: 32px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #fff;
+}
+
+    .btn-icon:hover {
+        background-color: #000;
+        color: #fff;
+        border-color: #000;
+    }
+
+    .btn-icon.delete-btn:hover {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
